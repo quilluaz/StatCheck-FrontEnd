@@ -1,18 +1,18 @@
 import React from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import Navbar from "../components/Navbar";
-import Landing from "../pages/Landing";
-import Home from "../pages/Home";
-import Buildings from "../pages/Buildings";
-import BuildingsRTL from "../pages/Buildings-RTL";
-import BuildingsNGE from "../pages/Buildings-NGE";
-import BuildingsGLE from "../pages/Buildings-GLE";
-import Reservation from "../pages/Reservation";
-import ReservationLibraryRoom from "../pages/Reservation-LibraryRoom";
-import ReservationParkingSlot from "../pages/Reservation-ParkingSlot";
-import UserProfile from "../pages/UserProfile";
-import Settings from "../pages/Settings";
-import About from "../pages/About";
+import Landing from "../userPages/Landing";
+import Home from "../userPages/Home";
+import Buildings from "../userPages/Buildings";
+import BuildingsRTL from "../userPages/Buildings-RTL";
+import BuildingsNGE from "../userPages/Buildings-NGE";
+import BuildingsGLE from "../userPages/Buildings-GLE";
+import Reservation from "../userPages/Reservation";
+import ReservationLibraryRoom from "../userPages/Reservation-LibraryRoom";
+import ReservationParkingSlot from "../userPages/Reservation-ParkingSlot";
+import UserProfile from "../userPages/UserProfile";
+import Settings from "../userPages/Settings";
+import About from "../userPages/About";
 
 function AppRoutes() {
   return (
