@@ -5,7 +5,7 @@ import UserRoutes from "./routes/UserRoutes";
 import Landing from "./userPages/Landing";
 
 const App = () => {
-  const [userRole, setUserRole] = useState('user'); // null, 'user', or 'admin'
+  const [userRole, setUserRole] = useState("user"); // null, 'user', or 'admin'
 
   const handleLogin = (role) => setUserRole(role);
 
