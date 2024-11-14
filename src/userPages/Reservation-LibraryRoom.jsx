@@ -3,12 +3,12 @@ import Navbar from '../components/UserNavbar' // Import your Navbar component
 
 // Dummy data for rooms and schedules
 const rooms = [
-  { id: '1', name: 'Study Room A', image: '/placeholder.svg?height=200&width=300', capacity: 4 },
-  { id: '2', name: 'Group Space B', image: '/placeholder.svg?height=200&width=300', capacity: 8 },
-  { id: '3', name: 'Quiet Zone C', image: '/placeholder.svg?height=200&width=300', capacity: 2 },
-  { id: '4', name: 'Collaboration Hub D', image: '/placeholder.svg?height=200&width=300', capacity: 12 },
-]
-
+    { id: '1', name: 'Multimedia Nook', image: '/images/multimedia-nook.jpg', capacity: 4 },
+    { id: '2', name: 'Activity Loft', image: '/images/activity-loft.jpg', capacity: 8 },
+    { id: '3', name: 'Pitch Room', image: '/images/pitch-room.jpg', capacity: 2 },
+    { id: '4', name: 'Reading Hub', image: '/images/reading-hub.jpg', capacity: 12 },
+];
+  
 const schedules = [
   { id: '1', start: '09:00', end: '10:00', isAvailable: true },
   { id: '2', start: '10:00', end: '11:00', isAvailable: false },
@@ -32,8 +32,23 @@ function RoomCard({ room, onSelect }) {
 
 // Room image component
 function RoomImage({ image }) {
-  return <img src={image} alt="Room" className="w-full h-40 object-cover" />
-}
+    return (
+      <div className="relative">
+        {/* The book cover */}
+        <img 
+          src="/images/wallofFame.jpg" 
+          alt="Book Cover" 
+          className="w-full h-40 object-cover absolute inset-0 transition-opacity duration-300 hover:opacity-0" 
+        />
+        {/* Actual room image */}
+        <img 
+          src={image} 
+          alt="Room" 
+          className="w-full h-40 object-cover"
+        />
+      </div>
+    );
+  }
 
 // Room details component (name, capacity)
 function RoomDetails({ room }) {
@@ -49,7 +64,7 @@ function RoomDetails({ room }) {
 }
 
 // Component for individual schedule item
-function ScheduleItem({ schedule }) {
+function ScheduleItem({ schedule, onBook }) {
   return (
     <div
       key={schedule.id}
@@ -60,7 +75,10 @@ function ScheduleItem({ schedule }) {
         <span>{formatScheduleTime(schedule)}</span>
       </div>
       {schedule.isAvailable ? (
-        <button className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors">
+        <button
+          className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors"
+          onClick={() => onBook(schedule)}
+        >
           Book Now
         </button>
       ) : (
@@ -79,6 +97,8 @@ function formatScheduleTime(schedule) {
 function LibraryRoom() {
   const [selectedRoom, setSelectedRoom] = useState(null)
   const [loading, setLoading] = useState(false) // Track loading state
+  const [showModal, setShowModal] = useState(false) // Modal visibility
+  const [selectedSchedule, setSelectedSchedule] = useState(null) // Selected schedule for booking
 
   // Simulate data loading or fetching from an API
   const loadRoomData = () => {
@@ -91,6 +111,24 @@ function LibraryRoom() {
   React.useEffect(() => {
     loadRoomData() // Load room data when component mounts
   }, [])
+
+  // Handle booking action
+  const handleBookClick = (schedule) => {
+    setSelectedSchedule(schedule)
+    setShowModal(true)
+  }
+
+  // Confirm booking action
+  const handleConfirmBooking = () => {
+    // Handle actual booking logic here
+    alert(`Booking confirmed for schedule ${formatScheduleTime(selectedSchedule)}`)
+    setShowModal(false)
+  }
+
+  // Cancel booking action
+  const handleCancelBooking = () => {
+    setShowModal(false)
+  }
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -126,7 +164,7 @@ function LibraryRoom() {
                   <p>No schedules available.</p>
                 ) : (
                   schedules.map((schedule) => (
-                    <ScheduleItem key={schedule.id} schedule={schedule} />
+                    <ScheduleItem key={schedule.id} schedule={schedule} onBook={handleBookClick} />
                   ))
                 )}
               </div>
@@ -141,6 +179,30 @@ function LibraryRoom() {
           <p>&copy; 2023 StatCheck. All rights reserved.</p>
         </div>
       </footer>
+
+      {/* Booking Confirmation Modal */}
+      {showModal && (
+        <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg">
+            <h3 className="text-xl font-semibold mb-4">Are you sure you want to book this room?</h3>
+            <p>{formatScheduleTime(selectedSchedule)}</p>
+            <div className="flex justify-between mt-4">
+              <button
+                onClick={handleCancelBooking}
+                className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmBooking}
+                className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+              >
+                Book
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
