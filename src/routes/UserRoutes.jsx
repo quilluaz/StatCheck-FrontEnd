@@ -12,6 +12,7 @@ import ReservationLibraryRoom from "../userPages/Reservation-LibraryRoom";
 import UserProfile from "../userPages/UserProfile";
 // import Settings from "../userPages/Settings";
 // import About from "../userPages/About";
+import Rooms from "../userPages/Rooms";
 
 function UserRoutes() {
   return (
@@ -29,6 +30,7 @@ function UserRoutes() {
          <Route path="/user-profile" element={<UserProfile />} /> 
         {/* <Route path="/settings" element={<Settings />} /> */}
         {/* <Route path="/about" element={<About />} /> */}
+        <Route path="/rooms" element={<Rooms />} /> 
       </Routes>
     </>
   );
