@@ -17,7 +17,6 @@ const BuildingsGLE = () => {
   // Simulating data fetch from a backend
   useEffect(() => {
     const fetchData = () => {
-      // This would be an API call in a real application
       setBuildingData({
         totalRooms: 48,
         totalFloors: 8,
@@ -28,7 +27,6 @@ const BuildingsGLE = () => {
     };
 
     fetchData();
-    // Set up an interval to refresh data every 30 seconds
     const intervalId = setInterval(fetchData, 30000);
 
     return () => clearInterval(intervalId);
@@ -41,12 +39,11 @@ const BuildingsGLE = () => {
   }));
 
   return (
-    <div className="flex flex-col min-h-screen">
-      {/* Add Navbar here */}
+    <div className="flex flex-col min-h-screen overflow-hidden">
       <Navbar />
     
-      <div className="min-h-screen bg-white text-black p-8 font-sans">
-        <div className="bg-[#A04747] rounded-lg p-6 shadow-lg mb-8">
+      <div className="bg-white text-black p-8 font-sans overflow-hidden">
+        <div className="bg-[#662506] rounded-lg p-6 shadow-lg mb-8">
           <h2 className="text-2xl font-semibold mb-6 text-white">Gregorio L. Escario Building (GLE)</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <AnalyticItem icon={<Home />} label="Total Rooms" value={buildingData.totalRooms} delay={0.1} />
@@ -56,14 +53,14 @@ const BuildingsGLE = () => {
           </div>
         </div>
         
-        <div className="bg-[#A04747] rounded-lg p-6 shadow-lg">
+        <div className="bg-[#662506] rounded-lg p-6 shadow-lg">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-semibold text-white">Floor {selectedFloor}</h2>
             <div className="relative">
               <select 
                 value={selectedFloor}
                 onChange={(e) => setSelectedFloor(Number(e.target.value))}
-                className="appearance-none bg-[#D8A25E] text-black py-2 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-[#EEDF7A] cursor-pointer"
+                className="appearance-none bg-[#F9F9DC] text-black py-2 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-[#F9F9DC] cursor-pointer"
               >
                 {[...Array(buildingData.totalFloors)].map((_, i) => (
                   <option key={i} value={i + 1}>Floor {i + 1}</option>
@@ -76,7 +73,7 @@ const BuildingsGLE = () => {
           </div>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {floorRooms.map((room, index) => (
-              <div key={room.id} className={`${room.isOccupied ? 'bg-[#D8A25E]' : 'bg-[#EEDF7A]'} rounded-lg p-4 text-center text-black transition-colors duration-300 animate-fadeIn`}>
+              <div key={room.id} className={`${room.isOccupied ? 'bg-[#7EA172]' : 'bg-[#F9F9DC]'} rounded-lg p-4 text-center text-black transition-colors duration-300 animate-fadeIn`}>
                 <div className="text-lg font-semibold">{room.id}</div>
                 <div className="mt-2 text-sm">{room.name}</div>
                 <div className="mt-1 text-xs">{room.isOccupied ? 'Occupied' : 'Vacant'}</div>
@@ -86,28 +83,12 @@ const BuildingsGLE = () => {
         </div>
       </div>
 
-      {/* Include styles for the fade-in and bounce animations */}
       <style jsx>{`
         @keyframes fadeIn {
           0% {
             opacity: 0;
           }
           100% {
-            opacity: 1;
-          }
-        }
-
-        @keyframes bounce {
-          0% {
-            transform: scale(0);
-            opacity: 0;
-          }
-          50% {
-            transform: scale(1.1);
-            opacity: 1;
-          }
-          100% {
-            transform: scale(1);
             opacity: 1;
           }
         }
@@ -119,30 +100,6 @@ const BuildingsGLE = () => {
           animation-fill-mode: forwards;
           opacity: 0;
         }
-
-        .animate-bounce {
-          animation-name: bounce;
-          animation-duration: 0.5s;
-          animation-timing-function: ease-out;
-          animation-fill-mode: forwards;
-          opacity: 0;
-        }
-
-        .animate-bounce:nth-child(2) {
-          animation-delay: 0.1s;
-        }
-
-        .animate-bounce:nth-child(3) {
-          animation-delay: 0.2s;
-        }
-
-        .animate-bounce:nth-child(4) {
-          animation-delay: 0.3s;
-        }
-
-        .animate-bounce:nth-child(5) {
-          animation-delay: 0.4s;
-        }
       `}</style>
     </div>
   );
@@ -150,7 +107,7 @@ const BuildingsGLE = () => {
 
 function AnalyticItem({ icon, label, value, delay }) {
   return (
-    <div className={`flex items-center space-x-3 bg-[#D8A25E] rounded-lg p-3 text-black animate-fadeIn`} style={{ animationDelay: `${delay}s` }}>
+    <div className={`flex items-center space-x-3 bg-[#F9F9DC] rounded-lg p-3 text-black animate-fadeIn`} style={{ animationDelay: `${delay}s` }}>
       <div className="text-black">{icon}</div>
       <div>
         <div className="text-sm text-black font-medium">{label}</div>
