@@ -3,7 +3,7 @@ import Navbar from '../components/UserNavbar';
 import profileImage from '../assets/lex.png';
 import facebookImage from '../assets/fb.svg';
 import twitterImage from '../assets/twitter.webp';
-import instagramImage from '../assets/lex.png';
+import instagramImage from '../assets/instagram.png';
 
 function UserProfile() {
   return (
@@ -40,15 +40,15 @@ function UserProfile() {
                     facebook.com/lexander
                   </a>
                 </div>
-                <div className="flex items-center justify-between bg-gray-100 p-3 rounded-lg">
-                  <img src={twitterImage} alt="Twitter" className="w-6 h-6" />
+                <div className="flex items-center justify-between bg-gray-100 p-2 rounded-lg">
+                  <img src={twitterImage} alt="Twitter" className="w-8 h-6" />
                   <span className="text-gray-800 font-medium">Twitter</span>
                   <a href="https://facebook.com/username" className="text-blue-500 hover:underline ml-auto">
                     twitter.com/lexander
                   </a>
                 </div>
                 <div className="flex items-center justify-between bg-gray-100 p-3 rounded-lg">
-                  <img src="/path-to-icon/instagram.png" alt="Instagram" className="w-6 h-6" />
+                  <img src={instagramImage} alt="Instagram" className="w-6 h-6" />
                   <span className="text-gray-800 font-medium">Instagram</span>
                   <a href="https://instagram.com/username" className="text-blue-500 hover:underline ml-auto">
                     instagram.com/lexander
@@ -60,27 +60,27 @@ function UserProfile() {
 
           {/* Right Side: Contact Info */}
           <div className="md:w-2/3 p-8">
-            <h3 className="text-lg font-semibold text-gray-700 mb-4">User Information</h3>
+            <h3 className="text-4xl font-semibold text-gray-700 mb-4">User Information</h3>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <span className="text-gray-500">Full Name</span>
-                <span className="text-gray-800 font-medium">Kenneth Valdez</span>
+                <span className="text-2xl text-gray-500">Full Name</span>
+                <span className="text-2xl text-gray-800 font-medium">Justin Labajos</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-gray-500">Email</span>
-                <span className="text-gray-800 font-medium">fip@jukmuh.al</span>
+                <span className="text-2xl text-gray-500">Email</span>
+                <span className="text-2xl text-gray-800 font-medium">justinplaysapex@gmail.com</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-gray-500">Phone</span>
-                <span className="text-gray-800 font-medium">(239) 816-9029</span>
+                <span className="text-2xl text-gray-500">Phone</span>
+                <span className="text-2xl text-gray-800 font-medium">(123) 456-7890</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-gray-500">Mobile</span>
-                <span className="text-gray-800 font-medium">(320) 380-4539</span>
+                <span className="text-2xl text-gray-500">Mobile</span>
+                <span className="text-2xl text-gray-800 font-medium">(098) 765-4321</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-gray-500">Address</span>
-                <span className="text-gray-800 font-medium">Bay Area, San Francisco, CA</span>
+                <span className="text-2xl text-gray-500">Address</span>
+                <span className="text-2xl text-gray-800 font-medium">Tisa, Cebu City, Cebu, PH</span>
               </div>
               <div className="flex justify-center mt-6">
                 <button className="bg-teal-500 text-white px-4 py-2 rounded hover:bg-teal-600">

@@ -9,13 +9,13 @@ function HomePage() {
       <Navbar />
       <main className="container mx-auto px-4 py-8">
         <section className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-800 mb-4">Welcome to StatCheck</h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">Welcome to StatCheck</h1>
+          <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
             Optimize your campus experience with real-time updates on room availability, class schedules, and parking spaces.
           </p>
         </section>
 
-        <section className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+        <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
           <FeatureCard
             icon={<FaClock className="text-blue-500" />}
             title="Real-Time Room Availability"
@@ -58,8 +58,8 @@ function HomePage() {
           />
         </section>
 
-        <section className="bg-white rounded-lg shadow-md p-8 mb-12">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">How StatCheck Helps You</h2>
+        <section className="bg-white rounded-lg shadow-md p-6 md:p-8 mb-12">
+          <h2 className="text-xl md:text-2xl font-bold text-gray-800 mb-4">How StatCheck Helps You</h2>
           <ul className="list-disc list-inside text-gray-600 space-y-2">
             <li>Save time by quickly finding available rooms and parking spaces</li>
             <li>Avoid overcrowded areas and plan your day more efficiently</li>
@@ -70,7 +70,7 @@ function HomePage() {
         </section>
 
         <section className="text-center">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">Ready to optimize your campus experience?</h2>
+          <h2 className="text-xl md:text-2xl font-bold text-gray-800 mb-4">Ready to optimize your campus experience?</h2>
           <button className="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-600 transition duration-300">
             Get Started with StatCheck
           </button>
