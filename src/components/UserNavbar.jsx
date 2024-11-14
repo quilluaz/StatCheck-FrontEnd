@@ -6,7 +6,7 @@ import {
   FaBars,
   FaTimes,
 } from "react-icons/fa";
-import UserImgIcon from "../assets/lex";
+import UserImgIcon from '../assets/lex.png';
 
 function Navbar() {
   const [activeDropdown, setActiveDropdown] = useState(null);
@@ -24,7 +24,7 @@ function Navbar() {
     <nav className="bg-[#8a333b] text-[#ffffff] p-4">
       <div className="container mx-auto flex items-center justify-between">
         <div className="flex items-center space-x-6">
-          <a href="/home" className="text-xl font-bold mr-8">
+          <a href="/home" className="text-xl font-bold ml-4 mr-8">
             StatCheck
           </a>
           <div className="hidden md:flex items-center space-x-6">
@@ -138,11 +138,15 @@ function NavItems({ handleDropdownToggle, activeDropdown }) {
 
 function UserMenu({ handleDropdownToggle, activeDropdown }) {
   return (
-    <div className="mt-4 md:mt-0">
+    <div className="mt-4 md:mt-0 mr-3">
       <button
         onClick={() => handleDropdownToggle("user")}
         className="flex items-center justify-center w-10 h-10 bg-[#993404] rounded-full hover:bg-gray-500 transition duration-200 text-[#fff7bc]">
-        <UserImgIcon />
+        <img
+              src={UserImgIcon}
+              alt="User Profile"
+              className="mx-auto rounded-full"
+            />
       </button>
       {activeDropdown === "user" && (
         <ul className="mt-2 md:absolute md:right-0 w-40 bg-[#a33c45] rounded-md shadow-lg py-2 z-10">
