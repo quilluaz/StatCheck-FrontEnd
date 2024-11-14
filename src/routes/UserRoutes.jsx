@@ -10,8 +10,7 @@ import BuildingsNGE from "../userPages/Buildings-NGE";
 import ReservationLibraryRoom from "../userPages/Reservation-LibraryRoom";
 import ReservationParkingSlot from "../userPages/Reservation-ParkingSlot";
 import UserProfile from "../userPages/UserProfile";
-// import Settings from "../userPages/Settings";
-// import About from "../userPages/About";
+import About from "../userPages/About";
 
 function UserRoutes() {
   return (
@@ -27,8 +26,7 @@ function UserRoutes() {
         <Route path="/reservations/library" element={<ReservationLibraryRoom />} />
         <Route path="/reservations/parking" element={<ReservationParkingSlot />} />
          <Route path="/user-profile" element={<UserProfile />} /> 
-        {/* <Route path="/settings" element={<Settings />} /> */}
-        {/* <Route path="/about" element={<About />} /> */}
+        <Route path="/about" element={<About />} />
       </Routes>
     </>
   );

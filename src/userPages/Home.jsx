@@ -2,12 +2,13 @@ import React from 'react';
 import { FaClock, FaUsers, FaCalendarAlt, FaBook, FaCar, FaBell, FaMobileAlt, FaChartLine } from 'react-icons/fa';
 import Navbar from '../components/UserNavbar';
 import FeatureCard from '../components/FeatureCard';
+import Footer from '../components/Footer';
 
 function HomePage() {
   return (
     <div className="min-h-screen bg-gray-100">
       <Navbar />
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mt-6 mx-auto px-6 py-8">
         <section className="text-center mb-12">
           <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">Welcome to StatCheck</h1>
           <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
@@ -15,7 +16,7 @@ function HomePage() {
           </p>
         </section>
 
-        <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+        <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           <FeatureCard
             icon={<FaClock className="text-blue-500" />}
             title="Real-Time Room Availability"
@@ -68,19 +69,8 @@ function HomePage() {
             <li>Access all information on-the-go with our mobile-friendly interface</li>
           </ul>
         </section>
-
-        <section className="text-center">
-          <h2 className="text-xl md:text-2xl font-bold text-gray-800 mb-4">Ready to optimize your campus experience?</h2>
-          <button className="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-600 transition duration-300">
-            Get Started with StatCheck
-          </button>
-        </section>
       </main>
-      <footer className="bg-gray-800 text-white py-4 mt-12">
-        <div className="container mx-auto text-center">
-          <p>&copy; 2023 StatCheck. All rights reserved.</p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

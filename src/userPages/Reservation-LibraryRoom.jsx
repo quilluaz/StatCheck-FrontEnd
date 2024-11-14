@@ -173,13 +173,6 @@ function LibraryRoom() {
         )}
       </main>
 
-      {/* Footer Section */}
-      <footer className="bg-gray-800 text-white py-4 mt-auto">
-        <div className="container mx-auto text-center">
-          <p>&copy; 2023 StatCheck. All rights reserved.</p>
-        </div>
-      </footer>
-
       {/* Booking Confirmation Modal */}
       {showModal && (
         <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
