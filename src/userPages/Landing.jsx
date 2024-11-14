@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { FaUser, FaEnvelope, FaLock, FaPhone, FaEye, FaEyeSlash } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
+import polygridBg from '../assets/polygridBg.svg';
 
 export default function LandingPage() {
   const [isLogin, setIsLogin] = useState(true);
@@ -10,35 +12,45 @@ export default function LandingPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
+  const navigate = useNavigate();
+
   const handleSubmit = (e) => {
     e.preventDefault();
     setIsLoading(true);
 
     if (isLogin) {
       console.log('Login submitted:', { email, password });
+      setTimeout(() => {
+        setIsLoading(false);
+        navigate('/home');
+      }, 1000);
     } else {
       console.log('Signup submitted:', { name, email, password, phone });
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 1000);
     }
-
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 1000);
   };
 
   return (
-    <div className="w-full min-h-screen bg-gradient-to-r from-purple-400 via-pink-500 to-red-500">
+    <div
+      className="w-full min-h-screen bg-cover bg-center"
+      style={{
+        backgroundImage: `url(${polygridBg})`
+      }}
+    >
       <div className="container mx-auto min-h-screen flex items-center justify-center px-4">
-        <div className="bg-white rounded-lg shadow-xl p-8 w-full max-w-md">
-          <h2 className="text-3xl font-bold text-center mb-4">
+        <div className="bg-black bg-opacity-70 rounded-lg shadow-xl p-8 w-full max-w-md">
+          <h2 className="text-3xl font-bold text-center text-white mb-4">
             {isLogin ? 'Welcome Back!' : 'Create an Account'}
           </h2>
-          <p className="text-center text-gray-600 mb-8">
-            {isLogin ? 'Please login to your account' : 'Sign up to get started'}
+          <p className="text-center text-gray-300 mb-8">
+            {isLogin ? 'Login to your account' : 'Sign up to get started'}
           </p>
           <form onSubmit={handleSubmit} className="space-y-6">
             {!isLogin && (
               <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="name" className="block text-sm font-medium text-gray-300">
                   Name
                 </label>
                 <div className="mt-1 relative rounded-md shadow-sm">
@@ -49,7 +61,7 @@ export default function LandingPage() {
                     id="name"
                     type="text"
                     required
-                    className="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md"
+                    className="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-3" // Added py-3 for height
                     placeholder="John Doe"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
@@ -58,7 +70,7 @@ export default function LandingPage() {
               </div>
             )}
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="email" className="block text-sm font-medium text-gray-300">
                 Email
               </label>
               <div className="mt-1 relative rounded-md shadow-sm">
@@ -69,7 +81,7 @@ export default function LandingPage() {
                   id="email"
                   type="email"
                   required
-                  className="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md"
+                  className="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-3" // Added py-3 for height
                   placeholder="you@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -77,7 +89,7 @@ export default function LandingPage() {
               </div>
             </div>
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="password" className="block text-sm font-medium text-gray-300">
                 Password
               </label>
               <div className="mt-1 relative rounded-md shadow-sm">
@@ -88,7 +100,7 @@ export default function LandingPage() {
                   id="password"
                   type={showPassword ? 'text' : 'password'}
                   required
-                  className="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md"
+                  className="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-3" // Added py-3 for height
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -103,7 +115,7 @@ export default function LandingPage() {
             </div>
             {!isLogin && (
               <div>
-                <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="phone" className="block text-sm font-medium text-gray-300">
                   Phone Number
                 </label>
                 <div className="mt-1 relative rounded-md shadow-sm">
@@ -114,7 +126,7 @@ export default function LandingPage() {
                     id="phone"
                     type="tel"
                     required
-                    className="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md"
+                    className="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-3" // Added py-3 for height
                     placeholder="+1 (555) 000-0000"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
@@ -126,17 +138,17 @@ export default function LandingPage() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                className="w-full flex justify-center py-2 px-4 border border-black rounded-md shadow-sm text-sm font-medium text-white bg-[#8a333b] hover:bg-opacity-90 focus:outline-none"
               >
                 {isLoading ? 'Processing...' : isLogin ? 'Sign In' : 'Sign Up'}
               </button>
             </div>
           </form>
           <div className="mt-6">
-            <p className="text-center text-sm">
+            <p className="text-center text-sm text-gray-300">
               {isLogin ? "Don't have an account?" : "Already have an account?"}
               <button
-                className="ml-1 font-medium text-indigo-600 hover:text-indigo-500"
+                className="ml-1 font-medium text-[#8a333b] hover:text-opacity-90" // Updated color to #8a333b
                 onClick={() => setIsLogin(!isLogin)}
               >
                 {isLogin ? 'Sign up' : 'Log in'}
