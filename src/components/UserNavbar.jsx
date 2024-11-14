@@ -16,11 +16,13 @@ function Navbar() {
   return (
     <nav className="bg-gray-800 text-white p-4">
       <div className="container mx-auto flex items-center justify-between">
-        <a href="/" className="text-xl font-bold">
-          StatCheck
-        </a>
-        <div className="hidden md:flex items-center space-x-6">
-          <NavItems handleDropdownToggle={handleDropdownToggle} activeDropdown={activeDropdown} />
+        <div className="flex items-center space-x-6">
+          <a href="/" className="text-xl font-bold">
+            StatCheck
+          </a>
+          <div className="hidden md:flex items-center space-x-6">
+            <NavItems handleDropdownToggle={handleDropdownToggle} activeDropdown={activeDropdown} />
+          </div>
         </div>
         <div className="hidden md:block relative">
           <UserMenu handleDropdownToggle={handleDropdownToggle} activeDropdown={activeDropdown} />
