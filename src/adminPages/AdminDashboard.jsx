@@ -35,7 +35,6 @@ const menuItems = [
 ];
 
 const userMenuItems = [
-  { name: "Profile", icon: UserCircleIcon },
   { name: "Settings", icon: Cog6ToothIcon },
   { name: "Sign Out", icon: ArrowRightOnRectangleIcon },
 ];
@@ -93,7 +92,7 @@ const AdminDashboard = () => {
       {/* Sidebar */}
       <aside
         style={{
-          backgroundColor: "#1f2937",
+          backgroundColor: "#8a333b",
           color: "white",
           width: sidebarWidth,
           position: "fixed",
@@ -108,7 +107,7 @@ const AdminDashboard = () => {
         <div
           className="p-4 border-b border-gray-700 flex items-center"
           style={{
-            backgroundColor: hoveredItem === "menu" ? "#374151" : "transparent",
+            backgroundColor: hoveredItem === "menu" ? "#e1bc29" : "transparent",
             transition: "background-color 150ms ease-in-out",
           }}
           onMouseEnter={() => setHoveredItem("menu")}
@@ -137,7 +136,7 @@ const AdminDashboard = () => {
                 key={item.name}
                 style={{
                   backgroundColor:
-                    hoveredItem === item.name ? "#374151" : "transparent",
+                    hoveredItem === item.name ? "#e1bc29" : "transparent",
                   transition: "background-color 150ms ease-in-out",
                 }}
                 className="px-4 py-2 cursor-pointer"
@@ -165,7 +164,7 @@ const AdminDashboard = () => {
           className="border-t border-gray-700 p-4 mt-auto relative"
           style={{
             backgroundColor:
-              hoveredItem === "profile" ? "#374151" : "transparent",
+              hoveredItem === "profile" ? "#e1bc29" : "transparent",
             transition: "background-color 150ms ease-in-out",
           }}
           onMouseEnter={() => setHoveredItem("profile")}
@@ -188,13 +187,13 @@ const AdminDashboard = () => {
             </button>
           </Tooltip>
           {isUserMenuOpen && (
-            <ul className="absolute bottom-full left-0 right-0 mb-2 bg-gray-700 rounded shadow-lg">
+            <ul className="absolute bottom-full left-0 right-0 mb-2 bg-[#a33c45] rounded shadow-lg">
               {userMenuItems.map((item) => (
                 <li
                   key={item.name}
                   style={{
                     backgroundColor:
-                      hoveredItem === item.name ? "#4B5563" : "transparent",
+                      hoveredItem === item.name ? "#e1bc29" : "transparent",
                     transition: "background-color 150ms ease-in-out",
                   }}
                   className="px-4 py-2 cursor-pointer"
