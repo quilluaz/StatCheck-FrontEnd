@@ -1,27 +1,17 @@
-import React from "react";
-import {
-  FaClock,
-  FaUsers,
-  FaCalendarAlt,
-  FaBook,
-  FaCar,
-  FaBell,
-  FaMobileAlt,
-  FaChartLine,
-} from "react-icons/fa";
-import FeatureCard from "../components/FeatureCard";
+import React from 'react';
+import { FaClock, FaUsers, FaCalendarAlt, FaBook, FaCar, FaBell, FaMobileAlt, FaChartLine } from 'react-icons/fa';
+import Navbar from '../components/UserNavbar';
+import FeatureCard from '../components/FeatureCard';
 
 function HomePage() {
   return (
     <div className="min-h-screen bg-gray-100">
+      <Navbar />
       <main className="container mx-auto px-4 py-8">
         <section className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-800 mb-4">
-            Welcome to StatCheck
-          </h1>
+          <h1 className="text-4xl font-bold text-gray-800 mb-4">Welcome to StatCheck</h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Optimize your campus experience with real-time updates on room
-            availability, class schedules, and parking spaces.
+            Optimize your campus experience with real-time updates on room availability, class schedules, and parking spaces.
           </p>
         </section>
 
@@ -69,29 +59,18 @@ function HomePage() {
         </section>
 
         <section className="bg-white rounded-lg shadow-md p-8 mb-12">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">
-            How StatCheck Helps You
-          </h2>
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">How StatCheck Helps You</h2>
           <ul className="list-disc list-inside text-gray-600 space-y-2">
-            <li>
-              Save time by quickly finding available rooms and parking spaces
-            </li>
+            <li>Save time by quickly finding available rooms and parking spaces</li>
             <li>Avoid overcrowded areas and plan your day more efficiently</li>
             <li>Reserve library rooms without the need for in-person visits</li>
-            <li>
-              Stay informed with real-time notifications about campus resources
-            </li>
-            <li>
-              Access all information on-the-go with our mobile-friendly
-              interface
-            </li>
+            <li>Stay informed with real-time notifications about campus resources</li>
+            <li>Access all information on-the-go with our mobile-friendly interface</li>
           </ul>
         </section>
 
         <section className="text-center">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">
-            Ready to optimize your campus experience?
-          </h2>
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">Ready to optimize your campus experience?</h2>
           <button className="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-600 transition duration-300">
             Get Started with StatCheck
           </button>
