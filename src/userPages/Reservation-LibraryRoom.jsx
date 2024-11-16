@@ -131,46 +131,57 @@ function LibraryRoom() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen">
-      {/* Add Navbar here */}
+    <div
+      className="flex flex-col min-h-screen"
+      style={{
+        backgroundImage: `url('/images/wallpeps.png')`,
+        backgroundSize: 'cover',
+        backgroundRepeat: 'no-repeat',
+        backgroundPosition: 'center',
+      }}
+    >
+      {/* Navbar */}
       <Navbar />
 
+      {/* Main Content in a Card */}
       <main className="flex-grow container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-6">Library Rooms</h1>
+        <div className="bg-white rounded-lg shadow-lg p-6">
+          <h1 className="text-3xl font-bold mb-6">Library Rooms</h1>
 
-        {loading ? (
-          <div className="flex justify-center items-center min-h-screen text-xl">Loading...</div>
-        ) : !selectedRoom ? (
-          // Room List
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-            {rooms.map((room) => (
-              <RoomCard key={room.id} room={room} onSelect={setSelectedRoom} />
-            ))}
-          </div>
-        ) : (
-          // Selected Room Details
-          <div>
-            <button
-              onClick={() => setSelectedRoom(null)}
-              className="mb-4 text-blue-600 hover:text-blue-800 flex items-center"
-            >
-              ← Back to rooms
-            </button>
-            <h2 className="text-2xl font-bold mb-4">{selectedRoom.name}</h2>
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h3 className="text-xl font-semibold mb-4">Available Schedules</h3>
-              <div className="space-y-4">
-                {schedules.length === 0 ? (
-                  <p>No schedules available.</p>
-                ) : (
-                  schedules.map((schedule) => (
-                    <ScheduleItem key={schedule.id} schedule={schedule} onBook={handleBookClick} />
-                  ))
-                )}
+          {loading ? (
+            <div className="flex justify-center items-center min-h-screen text-xl">Loading...</div>
+          ) : !selectedRoom ? (
+            // Room List
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+              {rooms.map((room) => (
+                <RoomCard key={room.id} room={room} onSelect={setSelectedRoom} />
+              ))}
+            </div>
+          ) : (
+            // Selected Room Details
+            <div>
+              <button
+                onClick={() => setSelectedRoom(null)}
+                className="mb-4 text-blue-600 hover:text-blue-800 flex items-center"
+              >
+                ← Back to rooms
+              </button>
+              <h2 className="text-2xl font-bold mb-4">{selectedRoom.name}</h2>
+              <div className="bg-white rounded-lg shadow-md p-6">
+                <h3 className="text-xl font-semibold mb-4">Available Schedules</h3>
+                <div className="space-y-4">
+                  {schedules.length === 0 ? (
+                    <p>No schedules available.</p>
+                  ) : (
+                    schedules.map((schedule) => (
+                      <ScheduleItem key={schedule.id} schedule={schedule} onBook={handleBookClick} />
+                    ))
+                  )}
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </main>
 
       {/* Booking Confirmation Modal */}
