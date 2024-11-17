@@ -15,7 +15,7 @@ function UserProfile() {
   useEffect(() => {
     const getUserProfile = async () => {
       try {
-        const response = await fetchUserProfile(1); // Example: Fetch user with ID 1
+        const response = await fetchUserProfile(2); // Example: Fetch user with ID 1
         setUserProfile(response.data);
         setEditableProfile(response.data); // Set initial editable state
       } catch (error) {
@@ -79,29 +79,35 @@ function UserProfile() {
             {/* Social Media Links */}
             <div className="mt-6">
               <h3 className="text-lg font-semibold text-gray-700 mb-2">Social Media</h3>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between bg-gray-100 p-3 rounded-lg">
-                  <img src={facebookImage} alt="Facebook" className="w-6 h-6" />
-                  <span className="text-gray-800 font-medium">Facebook</span>
-                  <a href="https://facebook.com/username" className="text-blue-500 hover:underline ml-auto">
-                    facebook.com/lexander
-                  </a>
-                </div>
-                <div className="flex items-center justify-between bg-gray-100 p-2 rounded-lg">
-                  <img src={twitterImage} alt="Twitter" className="w-8 h-6" />
-                  <span className="text-gray-800 font-medium">Twitter</span>
-                  <a href="https://twitter.com/username" className="text-blue-500 hover:underline ml-auto">
-                    twitter.com/lexander
-                  </a>
-                </div>
-                <div className="flex items-center justify-between bg-gray-100 p-3 rounded-lg">
-                  <img src={instagramImage} alt="Instagram" className="w-6 h-6" />
-                  <span className="text-gray-800 font-medium">Instagram</span>
-                  <a href="https://instagram.com/username" className="text-blue-500 hover:underline ml-auto">
-                    instagram.com/lexander
-                  </a>
-                </div>
-              </div>
+              {['socialMediaFacebook', 'socialMediaInstagram', 'socialMediaTwitter'].map((field, index) => {
+                const platform = field.replace('socialMedia', '');
+                const icons = [facebookImage, instagramImage, twitterImage];
+                return (
+                  <div
+                    key={field}
+                    className="flex items-center justify-between bg-gray-100 p-3 rounded-lg"
+                  >
+                    <img src={icons[index]} alt={platform} className="w-6 h-6" />
+                    <span className="text-gray-800 font-medium">{platform}</span>
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        name={field}
+                        value={editableProfile[field] || ''}
+                        onChange={handleChange}
+                        className="text-gray-800 border border-gray-300 p-1 rounded ml-auto"
+                      />
+                    ) : (
+                      <a
+                        href={editableProfile[field] || '#'}
+                        className="text-blue-500 hover:underline ml-auto"
+                      >
+                        {userProfile[field] || `Add your ${platform}`}
+                      </a>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
 
@@ -110,20 +116,20 @@ function UserProfile() {
             <h3 className="text-4xl font-semibold text-gray-700 mb-4">User Information</h3>
             <div className="space-y-8">
               {['fullName', 'email', 'phone', 'mobile', 'address'].map((field) => (
-                <div className="flex items-center justify-between w-full">
-                <span className="w-1/2 text-2xl text-gray-500 capitalize">{field.replace(/([A-Z])/g, ' $1')}</span>
-                {isEditing ? (
-                  <input
-                    type="text"
-                    name={field}
-                    value={editableProfile[field]}
-                    onChange={handleChange}
-                    className="text-2xl text-gray-800 font-medium border border-gray-300 p-1 rounded w-full"
-                  />
-                ) : (
-                  <span className="text-2xl text-gray-800 font-medium w-full">{userProfile[field]}</span>
-                )}
-              </div>
+                <div key={field} className="flex items-center justify-between w-full">
+                  <span className="w-1/2 text-2xl text-gray-500 capitalize">{field.replace(/([A-Z])/g, ' $1')}</span>
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      name={field}
+                      value={editableProfile[field] || ''}
+                      onChange={handleChange}
+                      className="text-2xl text-gray-800 font-medium border border-gray-300 p-1 rounded w-full"
+                    />
+                  ) : (
+                    <span className="text-2xl text-gray-800 font-medium w-full">{userProfile[field]}</span>
+                  )}
+                </div>
               ))}
               <div className="flex justify-center mt-6 space-x-4">
                 {isEditing ? (
