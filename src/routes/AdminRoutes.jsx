@@ -16,7 +16,7 @@ import Users from "../adminPages/Users";
 const AdminRoutes = () => {
   return (
     <Routes>
-      <Route path="/admin" element={<AdminDashboard />}>
+      <Route path="/" element={<AdminDashboard />}>
         <Route index element={<WelcomeToDashboard />} />
         <Route path="analytics" element={<AnalyticsForms />} />
         <Route path="buildings" element={<Buildings />} />
