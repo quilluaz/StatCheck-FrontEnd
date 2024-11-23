@@ -43,7 +43,7 @@ const BuildingsGLE = () => {
       <Navbar />
     
       <div className="bg-white text-black p-8 font-sans overflow-hidden">
-        <div className="bg-[#662506] rounded-lg p-6 shadow-lg mb-8">
+        <div className="bg-[#8a333b] rounded-lg p-6 shadow-lg mb-8">
           <h2 className="text-2xl font-semibold mb-6 text-white">Gregorio L. Escario Building (GLE)</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <AnalyticItem icon={<Home />} label="Total Rooms" value={buildingData.totalRooms} delay={0.1} />
@@ -53,14 +53,14 @@ const BuildingsGLE = () => {
           </div>
         </div>
         
-        <div className="bg-[#662506] rounded-lg p-6 shadow-lg">
+        <div className="bg-[#8a333b] rounded-lg p-6 shadow-lg">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-semibold text-white">Floor {selectedFloor}</h2>
             <div className="relative">
               <select 
                 value={selectedFloor}
                 onChange={(e) => setSelectedFloor(Number(e.target.value))}
-                className="appearance-none bg-[#F9F9DC] text-black py-2 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-[#F9F9DC] cursor-pointer"
+                className="appearance-none bg-[#ffffff] text-black py-2 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-[#F9F9DC] cursor-pointer"
               >
                 {[...Array(buildingData.totalFloors)].map((_, i) => (
                   <option key={i} value={i + 1}>Floor {i + 1}</option>
@@ -73,7 +73,7 @@ const BuildingsGLE = () => {
           </div>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {floorRooms.map((room, index) => (
-              <div key={room.id} className={`${room.isOccupied ? 'bg-[#7EA172]' : 'bg-[#F9F9DC]'} rounded-lg p-4 text-center text-black transition-colors duration-300 animate-fadeIn`}>
+              <div key={room.id} className={`${room.isOccupied ? 'bg-[#e1bc29]' : 'bg-[#ffffff]'} rounded-lg p-4 text-center text-black transition-colors duration-300 animate-fadeIn`}>
                 <div className="text-lg font-semibold">{room.id}</div>
                 <div className="mt-2 text-sm">{room.name}</div>
                 <div className="mt-1 text-xs">{room.isOccupied ? 'Occupied' : 'Vacant'}</div>

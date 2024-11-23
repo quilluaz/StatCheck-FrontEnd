@@ -1,81 +1,68 @@
-import axios from 'axios';
+const API_BASE_URL = "http://localhost:8080/api/rooms";
 
-const BASE_URL = 'http://localhost:8080/api';
-
-const api = axios.create({
-  baseURL: BASE_URL,
-  timeout: 5000,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
-
-export const roomsApi = {
-  // Get all rooms
+export const RoomAPI = {
   getAllRooms: async () => {
     try {
-      const response = await api.get('/rooms');
-      return response.data.map((room) => ({
-        roomID: room?.roomID || '',
-        roomNumber: room?.roomNumber || '',
-        roomType: room?.roomType || '',
-        capacity: room?.capacity || 0,
-        currentOccupancy: room?.currentOccupancy || 0,
-        availabilityStatus: room?.availabilityStatus || 'Available',
-        building: room?.building || { bldgID: '', bldgName: '' },
-      }));
+      const response = await fetch(API_BASE_URL);
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      return await response.json();
     } catch (error) {
-      throw new Error(error.response?.data?.message || 'Failed to load rooms');
+      console.error("Error fetching all rooms:", error);
+      throw error;
     }
   },
 
-  // Get all buildings
-  getAllBuildings: async () => {
-    try {
-      const response = await api.get('/buildings');
-      return response.data || [];
-    } catch (error) {
-      throw new Error('Failed to load buildings');
-    }
-  },
-
-  // Create a new room
   createRoom: async (roomData) => {
     try {
-      const response = await api.post('/rooms', {
-        ...roomData,
-        building: {
-          bldgID: parseInt(roomData.building.bldgID),
+      const response = await fetch(API_BASE_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
+        body: JSON.stringify(roomData),
       });
-      return response.data;
+      if (!response.ok) {
+        throw new Error(`Error creating room! Status: ${response.status}`);
+      }
+      return await response.json();
     } catch (error) {
-      throw new Error(error.response?.data?.message || 'Failed to add room');
+      console.error("Error creating room:", error);
+      throw error;
     }
   },
 
-  // Update an existing room
   updateRoom: async (roomID, roomData) => {
     try {
-      const response = await api.put(`/rooms/${roomID}`, {
-        ...roomData,
-        building: {
-          bldgID: parseInt(roomData.building.bldgID),
-          bldgName: roomData.building.bldgName,
+      const response = await fetch(`${API_BASE_URL}/${roomID}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
         },
+        body: JSON.stringify(roomData),
       });
-      return response.data;
+      if (!response.ok) {
+        throw new Error(`Error updating room! Status: ${response.status}`);
+      }
+      return await response.json();
     } catch (error) {
-      throw new Error(error.response?.data?.message || 'Failed to update room');
+      console.error(`Error updating room ${roomID}:`, error);
+      throw error;
     }
   },
 
-  // Delete a room
   deleteRoom: async (roomID) => {
     try {
-      await api.delete(`/rooms/${roomID}`);
+      const response = await fetch(`${API_BASE_URL}/${roomID}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) {
+        throw new Error(`Error deleting room! Status: ${response.status}`);
+      }
     } catch (error) {
-      throw new Error('Failed to delete room');
+      console.error(`Error deleting room ${roomID}:`, error);
+      throw error;
     }
   },
 };

@@ -1,5 +1,6 @@
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
+import ProtectedRoute from "../components/ProtectedRoute";
 import AdminDashboard from "../adminPages/AdminDashboard";
 import AnalyticsForms from "../adminPages/Analytics";
 import Buildings from "../adminPages/Buildings";
@@ -16,7 +17,14 @@ import Users from "../adminPages/Users";
 const AdminRoutes = () => {
   return (
     <Routes>
-      <Route path="/admin" element={<AdminDashboard />}>
+      <Route
+        path="/"
+        element={
+          <ProtectedRoute requiredRole="admin">
+            <AdminDashboard />
+          </ProtectedRoute>
+        }
+      >
         <Route index element={<WelcomeToDashboard />} />
         <Route path="analytics" element={<AnalyticsForms />} />
         <Route path="buildings" element={<Buildings />} />
@@ -38,9 +46,7 @@ const AdminRoutes = () => {
 const WelcomeToDashboard = () => {
   return (
     <div className="h-full flex items-center justify-center">
-      <h1 className="text-2xl font-bold">
-        Welcome to StatCheck Admin Dashboard
-      </h1>
+      <h1 className="text-2xl font-bold">Welcome to Admin Dashboard</h1>
     </div>
   );
 };
