@@ -133,7 +133,6 @@ export const logIn = async (credentials) => {
       }
     }
 
-    // Store user data in localStorage
     localStorage.setItem(
       "user",
       JSON.stringify({
@@ -142,7 +141,6 @@ export const logIn = async (credentials) => {
       })
     );
 
-    // Return data including the role for navigation
     return {
       success: true,
       data,
@@ -168,10 +166,9 @@ export const logIn = async (credentials) => {
   }
 };
 
-// Optional: Add a logout function
 export const logOut = async () => {
   try {
-    const response = await fetch("http://localhost:8080/api/logout", {
+    const response = await fetch("/api/auth/logout", {
       method: "POST",
       credentials: "include",
     });
@@ -180,6 +177,8 @@ export const logOut = async () => {
       throw new AuthError("Failed to logout", response.status);
     }
 
+    localStorage.removeItem("user");
+    
     return true;
   } catch (error) {
     if (error instanceof AuthError) {

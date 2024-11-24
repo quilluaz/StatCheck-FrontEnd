@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   FaUser,
   FaSignOutAlt,
@@ -6,7 +7,8 @@ import {
   FaBars,
   FaTimes,
 } from "react-icons/fa";
-import UserImgIcon from '../assets/lex.png';
+import { useAuth } from "../contexts/AuthContext";
+import UserImgIcon from "../assets/lex.png";
 
 function Navbar() {
   const [activeDropdown, setActiveDropdown] = useState(null);
@@ -137,16 +139,34 @@ function NavItems({ handleDropdownToggle, activeDropdown }) {
 }
 
 function UserMenu({ handleDropdownToggle, activeDropdown }) {
+  const navigate = useNavigate();
+  const { logout } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleLogout = async (e) => {
+    e.preventDefault();
+    try {
+      setIsLoading(true);
+      await logout();
+      navigate("/", { replace: true });
+    } catch (error) {
+      console.error("Logout failed:", error);
+      // Optionally show an error message to the user
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="mt-4 md:mt-0 mr-3">
       <button
         onClick={() => handleDropdownToggle("user")}
         className="flex items-center justify-center w-10 h-10 bg-[#993404] rounded-full hover:bg-gray-500 transition duration-200 text-[#fff7bc]">
         <img
-              src={UserImgIcon}
-              alt="User Profile"
-              className="mx-auto rounded-full"
-            />
+          src={UserImgIcon}
+          alt="User Profile"
+          className="mx-auto rounded-full"
+        />
       </button>
       {activeDropdown === "user" && (
         <ul className="mt-2 md:absolute md:right-0 w-40 bg-[#a33c45] rounded-md shadow-lg py-2 z-10">
@@ -158,11 +178,13 @@ function UserMenu({ handleDropdownToggle, activeDropdown }) {
             </a>
           </li>
           <li>
-            <a
-              href="/"
-              className="flex items-center px-4 py-2 hover:bg-[#8a333b]  transition duration-200 text-[#ffffff]">
-              <FaSignOutAlt className="mr-2" /> Sign Out
-            </a>
+            <button
+              onClick={handleLogout}
+              disabled={isLoading}
+              className="w-full flex items-center px-4 py-2 hover:bg-[#8a333b] transition duration-200 text-[#ffffff]">
+              <FaSignOutAlt className="mr-2" />
+              {isLoading ? "Signing out..." : "Sign Out"}
+            </button>
           </li>
         </ul>
       )}
