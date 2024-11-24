@@ -3,16 +3,19 @@ import { TextField, Button, Box, Select, MenuItem, FormControl, InputLabel } fro
 
 function UserForm({ user, onSubmit }) {
   const [formData, setFormData] = useState({
-    name: '',
     email: '',
     role: '',
-    phoneNumber: '',
-    status: ''
+    phoneNumber: ''
   });
 
   useEffect(() => {
     if (user) {
-      setFormData(user);
+      // Only set email, role, and phoneNumber (not name or status)
+      setFormData({
+        email: user.email || '',
+        role: user.role || '',
+        phoneNumber: user.phoneNumber || ''
+      });
     }
   }, [user]);
 
@@ -23,7 +26,7 @@ function UserForm({ user, onSubmit }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit(formData);
+    onSubmit(formData);  // Pass only email, role, and phoneNumber
   };
 
   return (
@@ -35,15 +38,6 @@ function UserForm({ user, onSubmit }) {
       <h2 className="text-2xl font-semibold text-gray-700 mb-4">Edit User</h2>
       
       <TextField
-        label="Name"
-        name="name"
-        value={formData.name}
-        onChange={handleChange}
-        required
-        fullWidth
-        className="bg-gray-50 border border-gray-300 rounded-md p-2"
-      />
-      <TextField
         label="Email"
         name="email"
         value={formData.email}
@@ -52,6 +46,7 @@ function UserForm({ user, onSubmit }) {
         fullWidth
         className="bg-gray-50 border border-gray-300 rounded-md p-2"
       />
+      
       <FormControl fullWidth className="bg-gray-50 border border-gray-300 rounded-md">
         <InputLabel>Role</InputLabel>
         <Select
@@ -61,10 +56,11 @@ function UserForm({ user, onSubmit }) {
           onChange={handleChange}
           className="bg-white"
         >
-          <MenuItem value="Active">Student</MenuItem>
-          <MenuItem value="Inactive">Teacher</MenuItem>
+          <MenuItem value="Student">Student</MenuItem>
+          <MenuItem value="Teacher">Teacher</MenuItem>
         </Select>
       </FormControl>
+      
       <TextField
         label="Phone Number"
         name="phoneNumber"
@@ -74,19 +70,6 @@ function UserForm({ user, onSubmit }) {
         fullWidth
         className="bg-gray-50 border border-gray-300 rounded-md p-2"
       />
-      <FormControl fullWidth className="bg-gray-50 border border-gray-300 rounded-md">
-        <InputLabel>Status</InputLabel>
-        <Select
-          label="Status"
-          name="status"
-          value={formData.status}
-          onChange={handleChange}
-          className="bg-white"
-        >
-          <MenuItem value="Active">Active</MenuItem>
-          <MenuItem value="Inactive">Inactive</MenuItem>
-        </Select>
-      </FormControl>
 
       <Button
         type="submit"

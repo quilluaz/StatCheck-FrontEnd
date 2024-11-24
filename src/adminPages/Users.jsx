@@ -13,7 +13,7 @@ function Users() {
 
   const loadUsers = () => {
     api
-      .get("/users")
+      .get("/auth")
       .then((response) => {
         const users = response.data;
         setUsers(users);
@@ -36,12 +36,17 @@ function Users() {
   };
 
   const handleUpdateUser = (updatedUser) => {
+    const userWithID = { ...updatedUser, userID: editUser.userID };  // Ensure userID is passed
     api
-      .put(`/users/${updatedUser.userID}`, updatedUser)
-      .then(() => {
-        loadUsers();
-        setOpenEditDialog(false);
-        setEditUser(null);
+      .put(`/auth/${userWithID.userID}`, userWithID) // Include the userID in the URL and payload
+      .then((response) => {
+        if (response.status === 200) {
+          loadUsers();
+          setOpenEditDialog(false);
+          setEditUser(null);
+        } else {
+          setError("Failed to update user. Please~ try again.");
+        }
       })
       .catch((error) => {
         console.error("Error updating user:", error);
@@ -49,15 +54,17 @@ function Users() {
       });
   };
 
+  
   const handleDeleteUser = (userID) => {
     api
-      .delete(`/users/${userID}`)
+      .delete(`/auth/${userID}`)
       .then(() => loadUsers())
       .catch((error) => {
         console.error("Error deleting user:", error);
         setError("Failed to delete user. Please try again.");
       });
   };
+
 
   const handleEditClick = (user) => {
     setEditUser(user);
@@ -67,27 +74,6 @@ function Users() {
   const handleCloseDialog = () => {
     setOpenEditDialog(false);
     setEditUser(null);
-  };
-
-  // Reservation edit & delete handlers
-  const handleEditReservationClick = (reservation) => {
-    setEditReservation(reservation);
-    setOpenReservationDialog(true);
-  };
-
-  const handleDeleteReservation = (reservationID) => {
-    api
-      .delete(`/reservations/${reservationID}`)
-      .then(() => loadUsers())
-      .catch((error) => {
-        console.error("Error deleting reservation:", error);
-        setError("Failed to delete reservation. Please try again.");
-      });
-  };
-
-  const handleCloseReservationDialog = () => {
-    setOpenReservationDialog(false);
-    setEditReservation(null);
   };
 
   useEffect(() => {
@@ -115,9 +101,6 @@ function Users() {
                 User ID
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Name
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Email
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -125,9 +108,6 @@ function Users() {
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Phone
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Status
               </th>
               <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Actions
@@ -139,11 +119,9 @@ function Users() {
               <React.Fragment key={user.userID}>
                 <tr className="hover:bg-gray-50">
                   <td className="px-6 py-4">{user.userID}</td>
-                  <td className="px-6 py-4">{user.name}</td>
                   <td className="px-6 py-4">{user.email}</td>
                   <td className="px-6 py-4">{user.role}</td>
                   <td className="px-6 py-4">{user.phoneNumber}</td>
-                  <td className="px-6 py-4">{user.accountStatus}</td>
                   <td className="px-6 py-4 text-center">
                     <div className="flex justify-center space-x-2">
                       <Button
@@ -165,60 +143,6 @@ function Users() {
                     </div>
                   </td>
                 </tr>
-
-                {/* Reservations section */}
-                {user.reservations && user.reservations.length > 0 && (
-                  <tr>
-                    <td colSpan={7} className="bg-gray-100 px-6 py-4">
-                      <h3 className="text-lg font-medium">Reserved Room:</h3>
-                      <table className="min-w-full mt-2 bg-white border border-gray-300">
-                        <thead className="bg-gray-50">
-                          <tr>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Reservation ID
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Room Name
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Time Slot
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Status
-                            </th>
-                            <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Actions
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {user.reservations.map((reservation) => (
-                            <tr key={reservation.libraryReservationID}>
-                              <td className="px-6 py-4">{reservation.libraryReservationID}</td>
-                              <td className="px-6 py-4">{reservation.libraryRoom?.roomName}</td>
-                              <td className="px-6 py-4">
-                                {reservation.startTime} - {reservation.endTime}
-                              </td>
-                              <td className="px-6 py-4">{reservation.status}</td>
-                              <td className="px-6 py-4 text-center">
-                                <Button
-                                  variant="outlined"
-                                  color="secondary"
-                                  onClick={() =>
-                                    handleDeleteReservation(reservation.libraryReservationID)
-                                  }
-                                  className="bg-red-500 text-white hover:bg-red-600 transition-all"
-                                >
-                                  Delete
-                                </Button>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </td>
-                  </tr>
-                )}
               </React.Fragment>
             ))}
           </tbody>
@@ -230,14 +154,6 @@ function Users() {
         <DialogTitle>Edit User</DialogTitle>
         <DialogContent>
           <UserForm onSubmit={handleUpdateUser} user={editUser} />
-        </DialogContent>
-      </Dialog>
-
-      {/* Edit reservation dialog */}
-      <Dialog open={openReservationDialog} onClose={handleCloseReservationDialog} maxWidth="md">
-        <DialogTitle>Edit Reservation</DialogTitle>
-        <DialogContent>
-          {/* Add your reservation edit form here */}
         </DialogContent>
       </Dialog>
     </div>
