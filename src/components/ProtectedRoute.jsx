@@ -1,20 +1,30 @@
-import React from "react";
-import { Navigate, useLocation } from "react-router-dom";
-import { isAuthenticated, hasRole } from "../services/TokenAuthAPI";
+import React, { useEffect } from "react";
+import { Navigate, useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 
 const ProtectedRoute = ({ children, requiredRole }) => {
   const location = useLocation();
-  
-  const authenticated = isAuthenticated();
-  
-  const hasRequiredRole = authenticated && requiredRole ? hasRole(requiredRole) : true;
+  const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
 
-  if (!authenticated) {
-    return <Navigate to="/" state={{ from: location.pathname }} replace />;
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate("/", { state: { from: location.pathname }, replace: true });
+      return;
+    }
+
+    if (requiredRole && user?.role !== requiredRole) {
+      const redirectPath = user?.role === "ADMIN" ? "/admin" : "/home";
+      navigate(redirectPath, { replace: true });
+    }
+  }, [isAuthenticated, user, requiredRole, navigate, location.pathname]);
+
+  if (!isAuthenticated) {
+    return null;
   }
 
-  if (!hasRequiredRole) {
-    return <Navigate to="/home" replace />;
+  if (requiredRole && user?.role !== requiredRole) {
+    return null;
   }
 
   return children;

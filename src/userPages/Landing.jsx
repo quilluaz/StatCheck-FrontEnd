@@ -27,13 +27,17 @@ export default function LandingPage() {
   const location = useLocation();
   const { login, user } = useAuth();
 
-  // Check authentication status only once on mount
   useEffect(() => {
-    if (user && location.pathname === "/") {
-      const redirectPath = user.role === "ADMIN" ? "/admin" : "/home";
-      navigate(redirectPath, { replace: true });
-    }
-  }, []); // Empty dependency array to run only once on mount
+    const checkAuthAndRedirect = () => {
+      if (user) {
+        // Explicitly check the role and redirect accordingly
+        const redirectPath = user.role === "ADMIN" ? "/admin" : "/home";
+        navigate(redirectPath, { replace: true });
+      }
+    };
+
+    checkAuthAndRedirect();
+  }, [user, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -51,7 +55,7 @@ export default function LandingPage() {
         // Then update auth context
         login(result.data);
 
-        // Navigate after a brief delay
+        // Navigate based on user role
         const redirectPath = result.data.role === "ADMIN" ? "/admin" : "/home";
         setTimeout(() => {
           navigate(redirectPath, { replace: true });

@@ -1,5 +1,6 @@
 import React from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 import ProtectedRoute from "../components/ProtectedRoute";
 import Landing from "../userPages/Landing";
 import Home from "../userPages/Home";
@@ -12,6 +13,12 @@ import UserProfile from "../userPages/UserProfile";
 import About from "../userPages/About";
 
 const UserRoutes = () => {
+  const { user } = useAuth();
+
+  if (user?.role === "ADMIN") {
+    return <Navigate to="/admin" replace />;
+  }
+
   return (
     <Routes>
       <Route path="/" element={<Landing />} />

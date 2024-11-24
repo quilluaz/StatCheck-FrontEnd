@@ -1,5 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Outlet, useNavigate, Link } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
+import { logOut } from "../services/UserAuthAPI";
 import {
   ChartBarIcon,
   TruckIcon,
@@ -10,10 +12,7 @@ import {
   ChevronUpDownIcon,
   Bars3Icon,
 } from "@heroicons/react/24/outline";
-import {
-  MdOutlineDoorFront,
-  MdSchedule,
-} from "react-icons/md";
+import { MdOutlineDoorFront, MdSchedule } from "react-icons/md";
 import { IoLibraryOutline } from "react-icons/io5";
 import { LuSchool2 } from "react-icons/lu";
 import { VscNotebook } from "react-icons/vsc";
@@ -24,9 +23,17 @@ const menuItems = [
   { name: "Analytics", icon: ChartBarIcon, path: "analytics" },
   { name: "Buildings", icon: LuSchool2, path: "buildings" },
   { name: "Library", icon: IoLibraryOutline, path: "library" },
-  { name: "Library Reservations", icon: FaRegCalendarPlus, path: "library-reservations" },
+  {
+    name: "Library Reservations",
+    icon: FaRegCalendarPlus,
+    path: "library-reservations",
+  },
   { name: "Parking Lot", icon: TruckIcon, path: "parking-lot" },
-  { name: "Parking Reservations", icon: FaRegCalendarPlus, path: "parking-reservations" },
+  {
+    name: "Parking Reservations",
+    icon: FaRegCalendarPlus,
+    path: "parking-reservations",
+  },
   { name: "Rooms", icon: MdOutlineDoorFront, path: "rooms" },
   { name: "Schedule", icon: MdSchedule, path: "schedule" },
   { name: "Subjects", icon: VscNotebook, path: "subjects" },
@@ -35,8 +42,8 @@ const menuItems = [
 ];
 
 const userMenuItems = [
-  { name: "Settings", icon: Cog6ToothIcon },
-  { name: "Sign Out", icon: ArrowRightOnRectangleIcon },
+  { name: "Settings", icon: Cog6ToothIcon, action: "settings" },
+  { name: "Sign Out", icon: ArrowRightOnRectangleIcon, action: "logout" },
 ];
 
 const Tooltip = ({ children, text, isVisible }) => {
@@ -82,6 +89,28 @@ const AdminDashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [hoveredItem, setHoveredItem] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
+  const { logout: authLogout, user } = useAuth();
+
+  const handleUserMenuAction = async (action) => {
+    setIsUserMenuOpen(false);
+
+    if (action === "logout") {
+      try {
+        setIsLoading(true);
+        await logOut();
+        await authLogout();
+        navigate("/", { replace: true });
+      } catch (error) {
+        console.error("Logout failed:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    } else if (action === "settings") {
+      navigate("/admin/settings");
+    }
+  };
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
@@ -174,13 +203,14 @@ const AdminDashboard = () => {
             isVisible={!isSidebarOpen && hoveredItem === "profile"}>
             <button
               onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-              className="flex items-center w-full text-left bg-transparent border-0 text-white cursor-pointer">
+              className="flex items-center w-full text-left bg-transparent border-0 text-white cursor-pointer"
+              disabled={isLoading}>
               <UserCircleIcon
                 className={`h-5 w-5 ${isSidebarOpen ? "mr-3" : ""}`}
               />
               {isSidebarOpen && (
                 <>
-                  <span>John Doe</span>
+                  <span>{user?.email || "Admin User"}</span>
                   <ChevronUpDownIcon className="h-5 w-5 ml-auto" />
                 </>
               )}
@@ -198,13 +228,16 @@ const AdminDashboard = () => {
                   }}
                   className="px-4 py-2 cursor-pointer"
                   onMouseEnter={() => setHoveredItem(item.name)}
-                  onMouseLeave={() => setHoveredItem(null)}>
-                  <Link
-                    to="#"
-                    className="flex items-center text-white no-underline">
+                  onMouseLeave={() => setHoveredItem(null)}
+                  onClick={() => handleUserMenuAction(item.action)}>
+                  <div className="flex items-center text-white">
                     <item.icon className="h-5 w-5 mr-3" />
-                    <span>{item.name}</span>
-                  </Link>
+                    <span>
+                      {isLoading && item.action === "logout"
+                        ? "Signing out..."
+                        : item.name}
+                    </span>
+                  </div>
                 </li>
               ))}
             </ul>
