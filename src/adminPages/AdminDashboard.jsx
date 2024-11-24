@@ -99,11 +99,14 @@ const AdminDashboard = () => {
     if (action === "logout") {
       try {
         setIsLoading(true);
+        console.log("Starting logout process...");
+        localStorage.removeItem("user");
         await logOut();
         await authLogout();
         navigate("/", { replace: true });
       } catch (error) {
-        console.error("Logout failed:", error);
+        console.error("Detailed logout error:", error);
+        navigate("/", { replace: true });
       } finally {
         setIsLoading(false);
       }
