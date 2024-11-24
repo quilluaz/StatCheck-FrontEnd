@@ -168,19 +168,31 @@ export const logIn = async (credentials) => {
 
 export const logOut = async () => {
   try {
-    const response = await fetch("/api/auth/logout", {
+    console.log("Making logout API request...");
+    const response = await fetch("http://localhost:8080/api/auth/logout", {
       method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
       credentials: "include",
     });
 
+    console.log("Logout API response:", response);
+
     if (!response.ok) {
-      throw new AuthError("Failed to logout", response.status);
+      throw new AuthError(
+        `Failed to logout: ${response.status} ${response.statusText}`,
+        response.status
+      );
     }
 
     localStorage.removeItem("user");
-    
+
     return true;
   } catch (error) {
+    console.error("Logout error details:", error);
+    localStorage.removeItem("user");
+
     if (error instanceof AuthError) {
       throw error;
     }
