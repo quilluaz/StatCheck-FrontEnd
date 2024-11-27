@@ -151,7 +151,6 @@ function UserMenu({ handleDropdownToggle, activeDropdown }) {
       navigate("/", { replace: true });
     } catch (error) {
       console.error("Logout failed:", error);
-      // Optionally show an error message to the user
     } finally {
       setIsLoading(false);
     }

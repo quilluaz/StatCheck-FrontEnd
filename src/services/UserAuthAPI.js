@@ -8,7 +8,6 @@ export class AuthError extends Error {
 
 export const signUp = async (userData) => {
   try {
-    // Input validation
     const { email, password, name, phone } = userData;
 
     if (
@@ -20,13 +19,11 @@ export const signUp = async (userData) => {
       throw new AuthError("All fields are required", 400);
     }
 
-    // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       throw new AuthError("Please enter a valid email address", 400);
     }
 
-    // Password validation
     if (password.length < 6) {
       throw new AuthError("Password must be at least 6 characters long", 400);
     }
@@ -43,28 +40,10 @@ export const signUp = async (userData) => {
     const data = await response.json();
 
     if (!response.ok) {
-      switch (response.status) {
-        case 403:
-          throw new AuthError(
-            data.message || "Access forbidden. Please check your credentials.",
-            403
-          );
-        case 409:
-          throw new AuthError(
-            "An account with this email already exists.",
-            409
-          );
-        case 422:
-          throw new AuthError(
-            data.message || "Invalid input data provided.",
-            422
-          );
-        default:
-          throw new AuthError(
-            "An unexpected error occurred during signup.",
-            response.status
-          );
-      }
+      throw new AuthError(
+        data.message || "An unexpected error occurred during signup.",
+        response.status
+      );
     }
 
     return data;
@@ -90,94 +69,53 @@ export const signUp = async (userData) => {
 
 export const logIn = async (credentials) => {
   try {
-    // Input validation
-    const { email, password } = credentials;
-
-    if (!email?.trim() || !password?.trim()) {
-      throw new AuthError("Email and password are required", 400);
-    }
-
-    // Email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      throw new AuthError("Please enter a valid email address", 400);
-    }
-
+    console.log('Attempting login...'); // Debug log
     const response = await fetch("/api/auth/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "Accept": "application/json",
       },
       body: JSON.stringify(credentials),
       credentials: "include",
     });
 
     const data = await response.json();
+    console.log('Login response:', response.status, data); // Debug log
 
     if (!response.ok) {
-      switch (response.status) {
-        case 401:
-          throw new AuthError("Invalid email or password", 401);
-        case 403:
-          throw new AuthError(data.message || "Access forbidden", 403);
-        case 422:
-          throw new AuthError(
-            data.message || "Invalid input data provided",
-            422
-          );
-        default:
-          throw new AuthError(
-            "An unexpected error occurred during login",
-            response.status
-          );
-      }
+      throw new AuthError(
+        data.message || data.error || "An unexpected error occurred during login",
+        response.status
+      );
     }
-
-    localStorage.setItem(
-      "user",
-      JSON.stringify({
-        email: data.email,
-        role: data.role,
-      })
-    );
 
     return {
       success: true,
-      data,
+      data: {
+        email: data.email,
+        role: data.role,
+      },
       redirectPath: data.role === "ADMIN" ? "/admin" : "/home",
     };
   } catch (error) {
+    console.error('Login error:', error); // Debug log
     if (error instanceof AuthError) {
       throw error;
     }
-    if (
-      error.name === "TypeError" &&
-      error.message.includes("Failed to fetch")
-    ) {
-      throw new AuthError(
-        "Unable to connect to the server. Please check your internet connection.",
-        0
-      );
-    }
     throw new AuthError(
-      "An unexpected error occurred. Please try again later.",
-      500
+      error.message || "An unexpected error occurred. Please try again later.",
+      error.status || 500
     );
   }
 };
-
+  
 export const logOut = async () => {
   try {
-    console.log("Making logout API request...");
-    const response = await fetch("http://localhost:8080/api/auth/logout", {
+    const response = await fetch("/api/auth/logout", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
       credentials: "include",
     });
-
-    console.log("Logout API response:", response);
 
     if (!response.ok) {
       throw new AuthError(
@@ -186,13 +124,8 @@ export const logOut = async () => {
       );
     }
 
-    localStorage.removeItem("user");
-
     return true;
   } catch (error) {
-    console.error("Logout error details:", error);
-    localStorage.removeItem("user");
-
     if (error instanceof AuthError) {
       throw error;
     }
