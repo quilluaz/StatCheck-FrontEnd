@@ -25,14 +25,17 @@ export default function LandingPage() {
 
   const navigate = useNavigate();
   const location = useLocation();
-  const { login, user } = useAuth();
+  const { login, user, setUser } = useAuth();
 
   useEffect(() => {
-    const checkAuthAndRedirect = () => {
-      if (user) {
-        // Explicitly check the role and redirect accordingly
-        const redirectPath = user.role === "ADMIN" ? "/admin" : "/home";
-        navigate(redirectPath, { replace: true });
+    const checkAuthAndRedirect = async () => {
+      try {
+        if (user && Object.keys(user).length > 0) {
+          const redirectPath = user.role === "ADMIN" ? "/admin" : "/home";
+          navigate(redirectPath, { replace: true });
+        }
+      } catch (error) {
+        console.error("Auth check failed:", error);
       }
     };
 
@@ -47,19 +50,8 @@ export default function LandingPage() {
 
     try {
       if (isLogin) {
-        const result = await logIn({ email, password });
-
-        // First set success message
+        const result = await login({ email, password });
         setSuccess("Login successful!");
-
-        // Then update auth context
-        login(result.data);
-
-        // Navigate based on user role
-        const redirectPath = result.data.role === "ADMIN" ? "/admin" : "/home";
-        setTimeout(() => {
-          navigate(redirectPath, { replace: true });
-        }, 1000);
       } else {
         await signUp({ name, email, password, phone });
         setSuccess("Account created successfully! You can now log in.");

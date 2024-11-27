@@ -100,8 +100,6 @@ const AdminDashboard = () => {
       try {
         setIsLoading(true);
         console.log("Starting logout process...");
-        localStorage.removeItem("user");
-        await logOut();
         await authLogout();
         navigate("/", { replace: true });
       } catch (error) {

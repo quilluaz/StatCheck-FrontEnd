@@ -5,25 +5,27 @@ import { useAuth } from "../contexts/AuthContext";
 const ProtectedRoute = ({ children, requiredRole }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, isLoading } = useAuth();
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      navigate("/", { state: { from: location.pathname }, replace: true });
-      return;
+    console.log("User state changed:", user);
+    if (!isLoading) {
+      if (!isAuthenticated) {
+        console.log("User not authenticated, redirecting to login");
+        navigate("/", { state: { from: location.pathname }, replace: true });
+      } else if (requiredRole && user?.role !== requiredRole) {
+        const redirectPath = user?.role === "ADMIN" ? "/admin" : "/home";
+        console.log(`User role mismatch, redirecting to ${redirectPath}`);
+        navigate(redirectPath, { replace: true });
+      }
     }
+  }, [isAuthenticated, user, requiredRole, navigate, location.pathname, isLoading]);
 
-    if (requiredRole && user?.role !== requiredRole) {
-      const redirectPath = user?.role === "ADMIN" ? "/admin" : "/home";
-      navigate(redirectPath, { replace: true });
-    }
-  }, [isAuthenticated, user, requiredRole, navigate, location.pathname]);
-
-  if (!isAuthenticated) {
-    return null;
+  if (isLoading) {
+    return <div>Loading...</div>; // Or your loading component
   }
 
-  if (requiredRole && user?.role !== requiredRole) {
+  if (!isAuthenticated || (requiredRole && user?.role !== requiredRole)) {
     return null;
   }
 
