@@ -1,29 +1,48 @@
 import axios from "axios";
 
-const USER_PROFILE_API_URL = "/api/auth/user-profiles";
-
-// Create an axios instance with default config
 const api = axios.create({
-  baseURL: USER_PROFILE_API_URL,
-  withCredentials: true, 
+  baseURL: '/api/auth',
+  withCredentials: true,
 });
 
 export const fetchCurrentUserProfile = async () => {
   try {
-    const response = await api.get('/current');
+    const response = await api.get('/user-profiles/current');
     return response.data;
   } catch (error) {
-    console.error("Error fetching user profile:", error);
+    console.error("Error fetching user profile:", error.response?.data || error.message);
     throw error;
   }
 };
 
 export const updateUserProfile = async (userId, userData) => {
   try {
-    const response = await api.put(`/update/${userId}`, userData);
+    const response = await api.post(`/user-profiles/update/${userId}`, {
+      name: userData.name,
+      email: userData.email,
+      phoneNumber: userData.phoneNumber,
+      role: userData.role
+    });
     return response.data;
   } catch (error) {
-    console.error("Error updating user profile:", error);
+    console.error("Error updating user profile:", error.response?.data || error.message);
+    throw error;
+  }
+};
+
+
+export const changePassword = async (passwordData) => {
+  try {
+    const response = await axios.post('/api/auth/change-password', {
+      oldPassword: passwordData.oldPassword,
+      newPassword: passwordData.newPassword,
+      confirmNewPassword: passwordData.newPassword
+    }, {
+      withCredentials: true
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error changing password:", error.response?.data || error.message);
     throw error;
   }
 };

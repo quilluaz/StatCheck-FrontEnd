@@ -1,13 +1,10 @@
 import React, { useState, useEffect } from "react";
 import Navbar from "../components/UserNavbar";
 import profileImage from "../assets/lex.png";
-import facebookImage from "../assets/fb.svg";
-import twitterImage from "../assets/twitter.webp";
-import instagramImage from "../assets/instagram.png";
 import {
   fetchCurrentUserProfile,
   updateUserProfile,
-  deleteUserProfile,
+  changePassword,
 } from "../services/UserProfileApi";
 import { useAuth } from "../contexts/AuthContext";
 
@@ -16,14 +13,22 @@ function UserProfile() {
   const [isEditing, setIsEditing] = useState(false);
   const [editableProfile, setEditableProfile] = useState({});
   const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isEditingPassword, setIsEditingPassword] = useState(false);
+  const [passwordFields, setPasswordFields] = useState({
+    oldPassword: "",
+    newPassword: "",
+    confirmNewPassword: "",
+  });
   const { user } = useAuth();
 
   useEffect(() => {
     const getUserProfile = async () => {
       try {
+        setIsLoading(true);
         console.log("Current user:", user);
         const profileData = await fetchCurrentUserProfile();
-        console.log("Profile response:", profileData);
+        console.log("Full profile response:", profileData);
         setUserProfile(profileData);
         setEditableProfile(profileData);
       } catch (error) {
@@ -31,35 +36,52 @@ function UserProfile() {
         setError(
           error.response?.data?.message || "Failed to load user profile"
         );
+      } finally {
+        setIsLoading(false);
       }
     };
 
     if (user) {
       getUserProfile();
+    } else {
+      setIsLoading(false);
     }
   }, [user]);
 
   const handleEditClick = () => {
     setIsEditing(true);
+    setIsEditingPassword(false);
   };
 
   const handleCancelClick = () => {
     setIsEditing(false);
     setEditableProfile(userProfile); // Revert changes
+    setIsEditingPassword(false);
+    // Reset password fields
+    setPasswordFields({
+      oldPassword: "",
+      newPassword: "",
+      confirmNewPassword: "",
+    });
   };
 
   const handleSaveClick = async () => {
     try {
-      const response = await updateUserProfile(
-        userProfile.userId,
-        editableProfile
-      );
-      setUserProfile(response.data); // Update with saved data
-      setIsEditing(false); // Exit edit mode
+      const updateData = {
+        name: editableProfile.name,
+        email: editableProfile.email,
+        phoneNumber: editableProfile.phoneNumber,
+        role: userProfile.role, // Preserve the existing role
+      };
+
+      const response = await updateUserProfile(userProfile.userID, updateData);
+
+      setUserProfile(response);
+      setIsEditing(false);
       alert("Profile updated successfully!");
     } catch (error) {
-      console.error("Error updating profile:", error);
-      alert("Failed to update profile.");
+      console.error("Error updating profile:", error.response?.data || error);
+      alert(error.response?.data?.error || "Failed to update profile.");
     }
   };
 
@@ -71,6 +93,57 @@ function UserProfile() {
     }));
   };
 
+  const handlePasswordChange = (e) => {
+    const { name, value } = e.target;
+    setPasswordFields((prevState) => ({
+      ...prevState,
+      [name]: value,
+    }));
+  };
+
+  const handleEditPasswordClick = () => {
+    setIsEditingPassword(true);
+  };
+
+  const handlePasswordSaveClick = async () => {
+    // Basic client-side validation
+    if (passwordFields.newPassword !== passwordFields.confirmNewPassword) {
+      alert("New passwords do not match");
+      return;
+    }
+
+    try {
+      await changePassword({
+        oldPassword: passwordFields.oldPassword,
+        newPassword: passwordFields.newPassword,
+        confirmNewPassword: passwordFields.confirmNewPassword,
+      });
+
+      alert("Password changed successfully!");
+
+      // Reset password fields and exit password edit mode
+      setPasswordFields({
+        oldPassword: "",
+        newPassword: "",
+        confirmNewPassword: "",
+      });
+      setIsEditingPassword(false);
+    } catch (error) {
+      // Handle error from backend
+      alert(error.response?.data?.error || "Failed to change password");
+    }
+  };
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="text-gray-500 text-xl">Loading profile...</div>
+      </div>
+    );
+  }
+
+  // Error state
   if (error) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -79,8 +152,13 @@ function UserProfile() {
     );
   }
 
+  // No user profile state
   if (!userProfile) {
-    return <div>Loading...</div>;
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="text-gray-500 text-xl">No user profile found</div>
+      </div>
+    );
   }
 
   return (
@@ -98,53 +176,8 @@ function UserProfile() {
               className="w-32 h-32 mx-auto rounded-full"
             />
             <h2 className="mt-4 text-xl font-semibold text-gray-800">
-              {userProfile.fullName}
+              {userProfile.name}
             </h2>
-            <p className="text-gray-500">{userProfile.address}</p>
-
-            {/* Social Media Links */}
-            <div className="mt-6">
-              <h3 className="text-lg font-semibold text-gray-700 mb-2">
-                Social Media
-              </h3>
-              {[
-                "socialMediaFacebook",
-                "socialMediaInstagram",
-                "socialMediaTwitter",
-              ].map((field, index) => {
-                const platform = field.replace("socialMedia", "");
-                const icons = [facebookImage, instagramImage, twitterImage];
-                return (
-                  <div
-                    key={field}
-                    className="flex items-center justify-between bg-gray-100 p-3 rounded-lg">
-                    <img
-                      src={icons[index]}
-                      alt={platform}
-                      className="w-6 h-6"
-                    />
-                    <span className="text-gray-800 font-medium">
-                      {platform}
-                    </span>
-                    {isEditing ? (
-                      <input
-                        type="text"
-                        name={field}
-                        value={editableProfile[field] || ""}
-                        onChange={handleChange}
-                        className="text-gray-800 border border-gray-300 p-1 rounded ml-auto"
-                      />
-                    ) : (
-                      <a
-                        href={editableProfile[field] || "#"}
-                        className="text-blue-500 hover:underline ml-auto">
-                        {userProfile[field] || `Add your ${platform}`}
-                      </a>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
           </div>
 
           {/* Right Side: Contact Info */}
@@ -153,30 +186,98 @@ function UserProfile() {
               User Information
             </h3>
             <div className="space-y-8">
-              {["fullName", "email", "phone", "mobile", "address"].map(
-                (field) => (
-                  <div
-                    key={field}
-                    className="flex items-center justify-between w-full">
-                    <span className="w-1/2 text-2xl text-gray-500 capitalize">
-                      {field.replace(/([A-Z])/g, " $1")}
+              {[
+                { key: "name", label: "Name" },
+                { key: "email", label: "Email" },
+                { key: "phoneNumber", label: "Phone Number" },
+              ].map(({ key, label }) => (
+                <div
+                  key={key}
+                  className="flex items-center justify-between w-full">
+                  <span className="w-1/2 text-2xl text-gray-500">{label}</span>
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      name={key}
+                      value={editableProfile[key] || ""}
+                      onChange={handleChange}
+                      className="text-2xl text-gray-800 font-medium border border-gray-300 p-1 rounded w-full"
+                    />
+                  ) : (
+                    <span className="text-2xl text-gray-800 font-medium w-full">
+                      {userProfile[key] || "Not provided"}
                     </span>
-                    {isEditing ? (
-                      <input
-                        type="text"
-                        name={field}
-                        value={editableProfile[field] || ""}
-                        onChange={handleChange}
-                        className="text-2xl text-gray-800 font-medium border border-gray-300 p-1 rounded w-full"
-                      />
-                    ) : (
-                      <span className="text-2xl text-gray-800 font-medium w-full">
-                        {userProfile[field]}
-                      </span>
-                    )}
-                  </div>
-                )
+                  )}
+                </div>
+              ))}
+
+              {/* Password Editing Section */}
+              {isEditing && (
+                <div className="mt-6">
+                  {!isEditingPassword ? (
+                    <button
+                      className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600"
+                      onClick={handleEditPasswordClick}>
+                      Edit Password
+                    </button>
+                  ) : (
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between w-full">
+                        <span className="w-1/2 text-2xl text-gray-500">
+                          Old Password
+                        </span>
+                        <input
+                          type="password"
+                          name="oldPassword"
+                          value={passwordFields.oldPassword}
+                          onChange={handlePasswordChange}
+                          className="text-2xl text-gray-800 font-medium border border-gray-300 p-1 rounded w-full"
+                          placeholder="Enter old password"
+                        />
+                      </div>
+                      <div className="flex items-center justify-between w-full">
+                        <span className="w-1/2 text-2xl text-gray-500">
+                          New Password
+                        </span>
+                        <input
+                          type="password"
+                          name="newPassword"
+                          value={passwordFields.newPassword}
+                          onChange={handlePasswordChange}
+                          className="text-2xl text-gray-800 font-medium border border-gray-300 p-1 rounded w-full"
+                          placeholder="Enter new password"
+                        />
+                      </div>
+                      <div className="flex items-center justify-between w-full">
+                        <span className="w-1/2 text-2xl text-gray-500">
+                          Confirm New Password
+                        </span>
+                        <input
+                          type="password"
+                          name="confirmNewPassword"
+                          value={passwordFields.confirmNewPassword}
+                          onChange={handlePasswordChange}
+                          className="text-2xl text-gray-800 font-medium border border-gray-300 p-1 rounded w-full"
+                          placeholder="Confirm new password"
+                        />
+                      </div>
+                      <div className="flex justify-center mt-4 space-x-4">
+                        <button
+                          className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+                          onClick={() => setIsEditingPassword(false)}>
+                          Cancel
+                        </button>
+                        <button
+                          className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+                          onClick={handlePasswordSaveClick}>
+                          Save Password
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
               )}
+
               <div className="flex justify-center mt-6 space-x-4">
                 {isEditing ? (
                   <>
