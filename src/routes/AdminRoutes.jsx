@@ -12,12 +12,12 @@ import Library from "../adminPages/Library";
 import LibraryReservations from "../adminPages/LibraryReservation";
 import Schedule from "../adminPages/Schedule";
 import Subjects from "../adminPages/Subjects";
-import TimeSlot from "../adminPages/TimeSlot";
 import Users from "../adminPages/Users";
+import LibraryRooms from "../adminPages/LibraryRooms";
 
 const AdminRoutes = () => {
   const { user } = useAuth();
-  
+
   if (user && user.role !== "ADMIN") {
     return <Navigate to="/home" replace />;
   }
@@ -56,10 +56,18 @@ const AdminRoutes = () => {
           }
         />
         <Route
-          path="library"
+          path="libraries"
           element={
             <ProtectedRoute requiredRole="ADMIN">
               <Library />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="library-rooms"
+          element={
+            <ProtectedRoute requiredRole="ADMIN">
+              <LibraryRooms />
             </ProtectedRoute>
           }
         />
@@ -108,14 +116,6 @@ const AdminRoutes = () => {
           element={
             <ProtectedRoute requiredRole="ADMIN">
               <Subjects />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="timeslot"
-          element={
-            <ProtectedRoute requiredRole="ADMIN">
-              <TimeSlot />
             </ProtectedRoute>
           }
         />

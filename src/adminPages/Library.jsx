@@ -1,149 +1,167 @@
-import React, { useEffect, useState } from "react";
-import { api } from "../services/LibraryAPI";
-import LibraryRoomForm from "./LibraryForms";
+import React, { useState, useEffect } from "react";
+import * as LibraryApi from '../services/AdminAPI/LibraryAPI';
+import { Pencil, Trash2, Plus } from "lucide-react";
 
 const Library = () => {
-  const [rooms, setRooms] = useState([]);
+  const [libraries, setLibraries] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingLibrary, setEditingLibrary] = useState(null);
+  const [formData, setFormData] = useState({
+    libraryName: "",
+  });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [editingRoom, setEditingRoom] = useState(null);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    loadRooms();
+    fetchLibraries();
   }, []);
 
-  const loadRooms = async () => {
-    setLoading(true);
+  const fetchLibraries = async () => {
     try {
-      const response = await api.get("/rooms");
-      setRooms(response.data);
-      setError("");
-    } catch (err) {
-      console.error("Error fetching library rooms:", err);
-      setError("Failed to load library rooms. Please try again later.");
-    }
-    setLoading(false);
-  };
-
-  const handleDelete = async (roomID) => {
-    if (window.confirm("Are you sure you want to delete this room?")) {
       setLoading(true);
-      try {
-        await api.delete(`/rooms/${roomID}`);
-        loadRooms();
-      } catch (err) {
-        console.error("Error deleting library room:", err);
-        setError("Failed to delete library room. Please try again.");
+      const data = await LibraryApi.getAllLibraries();
+      setLibraries(data);
+      setError(null);
+    } catch (err) {
+      if (err.response?.status === 401) {
+        setError("Unauthorized access. Please ensure you are logged in as an admin.");
+      } else {
+        setError("Failed to fetch libraries. Please try again later.");
       }
+    } finally {
       setLoading(false);
     }
   };
 
-  const handleEdit = (room) => {
-    setEditingRoom(room);
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
-  const handleRoomUpdated = async (updatedRoom) => {
-    setLoading(true);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     try {
-      await api.put(`/rooms/${updatedRoom.libraryRoomID}`, updatedRoom);
-      loadRooms();
-      setEditingRoom(null);
+      setLoading(true);
+      if (editingLibrary) {
+        await LibraryApi.updateLibrary(editingLibrary.libraryID, formData);
+      } else {
+        await LibraryApi.createLibrary(formData);
+      }
+      await fetchLibraries();
+      handleCloseModal();
     } catch (err) {
-      console.error("Error updating library room:", err);
-      setError("Failed to update library room. Please try again.");
+      if (err.response?.status === 401) {
+        setError("Unauthorized access. Please ensure you are logged in as an admin.");
+      } else {
+        setError(editingLibrary ? "Failed to update library" : "Failed to create library");
+      }
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
+  };
+
+  const handleDelete = async (id) => {
+    if (window.confirm("Are you sure you want to delete this library?")) {
+      try {
+        setLoading(true);
+        await LibraryApi.deleteLibrary(id);
+        await fetchLibraries();
+      } catch (err) {
+        if (err.response?.status === 401) {
+          setError("Unauthorized access. Please ensure you are logged in as an admin.");
+        } else {
+          setError("Failed to delete library");
+        }
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
+  const handleEdit = (library) => {
+    setEditingLibrary(library);
+    setFormData({
+      libraryName: library.libraryName,
+    });
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setEditingLibrary(null);
+    setFormData({ libraryName: "" });
   };
 
   return (
-    <div className="container mx-auto px-4">
-      <div className="py-4">
-        <h1 className="text-2xl font-bold mb-4">Library Rooms Directory</h1>
+    <div className="container mx-auto p-6">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">Libraries</h1>
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className="flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+          <Plus size={20} />
+          Add Library
+        </button>
+      </div>
 
-        <LibraryRoomForm
-          onRoomAdded={loadRooms}
-          onRoomEdited={handleRoomUpdated}
-          editingRoom={editingRoom}
-        />
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+          {error}
+        </div>
+      )}
 
-        {error && (
-          <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-4">
-            <div className="flex">
-              <div className="flex-shrink-0">
-                <svg
-                  className="h-5 w-5 text-red-400"
-                  viewBox="0 0 20 20"
-                  fill="currentColor">
-                  <path
-                    fillRule="evenodd"
-                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </div>
-              <div className="ml-3 text-red-700">{error}</div>
-            </div>
-          </div>
-        )}
-
-        {loading && <div className="text-center py-4">Loading...</div>}
-
+      {loading ? (
+        <div className="text-center py-4">Loading...</div>
+      ) : (
         <div className="overflow-x-auto">
-          <table className="min-w-full bg-white border border-gray-300 shadow-sm rounded-lg">
+          <table className="min-w-full bg-white border border-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 border-b border-r text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Room ID
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Library ID
                 </th>
-                <th className="px-6 py-3 border-b border-r text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Room Name
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Library Name
                 </th>
-                <th className="px-6 py-3 border-b border-r text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Booking Status
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Rooms
                 </th>
-                <th className="px-6 py-3 border-b border-r text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Available Time Slots
-                </th>
-                <th className="px-6 py-3 border-b text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {rooms.map((room) => (
-                <tr key={room.libraryRoomID} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap border-r">
-                    {room.libraryRoomID}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap border-r">
-                    {room.roomName}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap border-r">
-                    {room.bookingStatus}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap border-r">
-                    {Array.isArray(room.availableTimeSlots)
-                      ? room.availableTimeSlots.join(", ")
-                      : "No time slots available"}
+              {libraries.map((library) => (
+                <tr key={library.libraryID}>
+                  <td className="px-6 py-4 whitespace-nowrap">{library.libraryID}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">{library.libraryName}</td>
+                  <td className="px-6 py-4">
+                    <div className="flex flex-wrap gap-2">
+                      {library.libraryRooms.map((room, index) => (
+                        <span
+                          key={index}
+                          className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                        >
+                          {room.roomName}
+                        </span>
+                      ))}
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex space-x-2">
+                    <div className="flex gap-2">
                       <button
-                        onClick={() => handleEdit(room)}
-                        className={`px-3 py-1 rounded ${
-                          editingRoom?.libraryRoomID === room.libraryRoomID
-                            ? "bg-green-500 hover:bg-green-600"
-                            : "bg-blue-500 hover:bg-blue-600"
-                        } text-white transition-colors`}>
-                        {editingRoom?.libraryRoomID === room.libraryRoomID
-                          ? "Save"
-                          : "Edit"}
+                        onClick={() => handleEdit(library)}
+                        className="text-blue-600 hover:text-blue-800">
+                        <Pencil size={20} />
                       </button>
                       <button
-                        onClick={() => handleDelete(room.libraryRoomID)}
-                        className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors">
-                        Delete
+                        onClick={() => handleDelete(library.libraryID)}
+                        className="text-red-600 hover:text-red-800">
+                        <Trash2 size={20} />
                       </button>
                     </div>
                   </td>
@@ -152,7 +170,46 @@ const Library = () => {
             </tbody>
           </table>
         </div>
-      </div>
+      )}
+
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white p-6 rounded-lg w-full max-w-md">
+            <h2 className="text-xl font-bold mb-4">
+              {editingLibrary ? "Edit Library" : "Add New Library"}
+            </h2>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Library Name
+                </label>
+                <input
+                  type="text"
+                  name="libraryName"
+                  value={formData.libraryName}
+                  onChange={handleInputChange}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2"
+                  required
+                />
+              </div>
+              <div className="flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={handleCloseModal}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200">
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded-md hover:bg-blue-600"
+                  disabled={loading}>
+                  {loading ? "Saving..." : "Save"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

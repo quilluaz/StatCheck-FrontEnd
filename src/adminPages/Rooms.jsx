@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { BuildingAPI } from "../services/BuildingAPI";
-import { RoomAPI } from "../services/RoomAPI";
+import { BuildingAPI } from "../services/AdminAPI/BuildingAPI";
+import { RoomAPI } from "../services/AdminAPI/RoomAPI";
 import { Pencil, Trash, Plus, X } from "lucide-react";
 
 const Rooms = () => {
@@ -17,6 +17,7 @@ const Rooms = () => {
     availabilityStatus: "",
     building: null,
     floorNumber: "",
+    schedules: [],
   });
   const [isEditing, setIsEditing] = useState(false);
 
@@ -82,10 +83,10 @@ const Rooms = () => {
         ...prev,
         floorNumber: parseInt(value),
       }));
-    } else if (name === "capacity") {
+    } else if (name === "capacity" || name === "currentCapacity") {
       setCurrentRoom((prev) => ({
         ...prev,
-        [name]: parseInt(value) || "",
+        [name]: parseInt(value) || 0,
       }));
     } else {
       setCurrentRoom((prev) => ({
@@ -124,6 +125,14 @@ const Rooms = () => {
     if (!currentRoom.availabilityStatus) {
       throw new Error("Availability status is required");
     }
+
+    if (currentRoom.currentCapacity < 0) {
+      throw new Error("Current capacity cannot be negative");
+    }
+
+    if (currentRoom.currentCapacity > currentRoom.capacity) {
+      throw new Error("Current capacity cannot exceed maximum capacity");
+    }
   };
 
   const handleSubmit = async (event) => {
@@ -141,6 +150,7 @@ const Rooms = () => {
           buildingID: currentRoom.building.buildingID,
         },
         floorNumber: parseInt(currentRoom.floorNumber),
+        schedules: currentRoom.schedules || [],
       };
 
       setIsLoading(true);
@@ -162,7 +172,7 @@ const Rooms = () => {
 
   const handleEdit = (room) => {
     setCurrentRoom({
-      roomID: room.roomID,
+      roomID: room.roomId,
       roomType: room.roomType,
       capacity: room.capacity,
       currentCapacity: room.currentCapacity,
@@ -173,6 +183,7 @@ const Rooms = () => {
         floors: room.building.floors,
       },
       floorNumber: room.floorNumber,
+      schedules: room.schedules || [],
     });
     setIsEditing(true);
     setIsModalOpen(true);
@@ -203,35 +214,31 @@ const Rooms = () => {
       availabilityStatus: "",
       building: null,
       floorNumber: "",
+      schedules: [],
     });
   };
 
   return (
     <div className="container mx-auto p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Rooms Management</h1>
+        <h1 className="text-2xl font-bold">Rooms Management</h1>
         <button
           onClick={() => setIsModalOpen(true)}
-          className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2">
+          className="flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
           <Plus size={20} />
-          Add New Room
+          Add Room
         </button>
       </div>
 
       {isLoading ? (
-        <div className="flex justify-center items-center h-32">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-        </div>
+        <div className="text-center py-4">Loading...</div>
       ) : (
-        <div className="overflow-x-auto bg-white rounded-lg shadow">
-          <table className="min-w-full table-auto">
+        <div className="overflow-x-auto">
+          <table className="min-w-full bg-white border border-gray-200">
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Room ID
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Room Name
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Building
@@ -252,17 +259,17 @@ const Rooms = () => {
                   Status
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Schedules
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="divide-y divide-gray-200">
               {rooms.map((room) => (
                 <tr key={room.roomID} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap">{room.roomID}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {room.roomName}
-                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">{room.roomId}</td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     {room.building?.buildingName}
                   </td>
@@ -282,16 +289,27 @@ const Rooms = () => {
                     {room.availabilityStatus}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
+                    {room.schedules && room.schedules.length > 0 ? (
+                      <ul>
+                        {room.schedules.map((schedule) => (
+                          <li key={schedule.id}>{schedule.details}</li>
+                        ))}
+                      </ul>
+                    ) : (
+                      "No schedules"
+                    )}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex gap-2">
                       <button
                         onClick={() => handleEdit(room)}
-                        className="text-blue-500 hover:text-blue-600">
-                        <Pencil size={18} />
+                        className="text-blue-600 hover:text-blue-800">
+                        <Pencil size={20} />
                       </button>
                       <button
                         onClick={() => handleDelete(room.roomID)}
-                        className="text-red-500 hover:text-red-600">
-                        <Trash size={18} />
+                        className="text-red-600 hover:text-red-800">
+                        <Trash size={20} />
                       </button>
                     </div>
                   </td>
@@ -303,18 +321,11 @@ const Rooms = () => {
       )}
 
       {isModalOpen && (
-        <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold">
-                {isEditing ? "Edit Room" : "Add Room"}
-              </h2>
-              <button
-                onClick={handleCloseModal}
-                className="text-gray-500 hover:text-gray-700">
-                <X size={20} />
-              </button>
-            </div>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white p-6 rounded-lg w-full max-w-md">
+            <h2 className="text-xl font-bold mb-4">
+              {isEditing ? "Edit Room" : "Add New Room"}
+            </h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700">
@@ -390,6 +401,22 @@ const Rooms = () => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700">
+                  Current Capacity
+                </label>
+                <input
+                  type="number"
+                  name="currentCapacity"
+                  value={currentRoom.currentCapacity}
+                  onChange={handleInputChange}
+                  className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md"
+                  required
+                  min="0"
+                  max={currentRoom.capacity || 0}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
                   Availability Status
                 </label>
                 <select
@@ -405,17 +432,18 @@ const Rooms = () => {
                 </select>
               </div>
 
-              <div className="flex justify-end gap-3 mt-6">
+              <div className="flex justify-end gap-2">
                 <button
                   type="button"
                   onClick={handleCloseModal}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md">
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200">
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 rounded-md">
-                  {isEditing ? "Update Room" : "Add Room"}
+                  className="px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded-md hover:bg-blue-600"
+                  disabled={isLoading}>
+                  {isLoading ? "Saving..." : "Save"}
                 </button>
               </div>
             </form>

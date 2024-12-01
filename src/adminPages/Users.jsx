@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { api } from "../services/UserAPI";
-import UserForm from "./UserForms";
-import { Button, Dialog, DialogContent, DialogTitle, Snackbar } from "@mui/material";
+import { UserAPI } from "../services/AdminAPI/UserAPI";
+import { Pencil, Trash2, Plus } from "lucide-react";
 
 function Users() {
   const [users, setUsers] = useState([]);
@@ -11,60 +10,61 @@ function Users() {
   const [editReservation, setEditReservation] = useState(null);
   const [openReservationDialog, setOpenReservationDialog] = useState(false);
 
-  const loadUsers = () => {
-    api
-      .get("/auth")
-      .then((response) => {
-        const users = response.data;
-        setUsers(users);
-        setError(null);
-      })
-      .catch((error) => {
-        console.error("Error loading users:", error);
-        setError("Failed to load users. Please try again later.");
-      });
+  const loadUsers = async () => {
+    try {
+      const users = await UserAPI.getAllUsers();
+      setUsers(users);
+      setError(null);
+    } catch (error) {
+      console.error("Error loading users:", error);
+      setError("Failed to load users. Please try again later.");
+    }
   };
 
-  const handleAddUser = (userData) => {
-    api
-      .post("/users", userData)
-      .then(() => loadUsers())
-      .catch((error) => {
-        console.error("Error adding user:", error);
-        setError("Failed to add user. Please try again.");
-      });
+  const handleAddUser = async (userData) => {
+    try {
+      await UserAPI.createUser(userData);
+      loadUsers();
+    } catch (error) {
+      console.error("Error adding user:", error);
+      setError("Failed to add user. Please try again.");
+    }
   };
 
-  const handleUpdateUser = (updatedUser) => {
-    const userWithID = { ...updatedUser, userID: editUser.userID };  // Ensure userID is passed
-    api
-      .put(`/auth/${userWithID.userID}`, userWithID) // Include the userID in the URL and payload
-      .then((response) => {
-        if (response.status === 200) {
-          loadUsers();
-          setOpenEditDialog(false);
-          setEditUser(null);
-        } else {
-          setError("Failed to update user. Please~ try again.");
-        }
-      })
-      .catch((error) => {
-        console.error("Error updating user:", error);
-        setError("Failed to update user. Please try again.");
-      });
+  const handleUpdateUser = async (updatedUser) => {
+    try {
+      if (!editUser || !editUser.userID) {
+        setError("No user selected for update");
+        return;
+      }
+
+      const updatePayload = {
+        email: updatedUser.email,
+        name: updatedUser.name,
+        phoneNumber: updatedUser.phoneNumber,
+        role: updatedUser.role.toUpperCase(),
+      };
+
+      await UserAPI.updateUser(editUser.userID, updatePayload);
+      await loadUsers();
+      setOpenEditDialog(false);
+      setEditUser(null);
+      setError(null);
+    } catch (error) {
+      console.error("Error updating user:", error);
+      setError("Failed to update user. Please try again.");
+    }
   };
 
-  
-  const handleDeleteUser = (userID) => {
-    api
-      .delete(`/auth/${userID}`)
-      .then(() => loadUsers())
-      .catch((error) => {
-        console.error("Error deleting user:", error);
-        setError("Failed to delete user. Please try again.");
-      });
+  const handleDeleteUser = async (userID) => {
+    try {
+      await UserAPI.deleteUser(userID);
+      loadUsers();
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      setError("Failed to delete user. Please try again.");
+    }
   };
-
 
   const handleEditClick = (user) => {
     setEditUser(user);
@@ -76,25 +76,149 @@ function Users() {
     setEditUser(null);
   };
 
+  const UserForm = ({ onSubmit, user }) => {
+    const [formData, setFormData] = useState({
+      email: user?.email || "",
+      password: "",
+      phoneNumber: user?.phoneNumber || "",
+      name: user?.name || "",
+      role: user?.role || "USER",
+    });
+
+    useEffect(() => {
+      if (user) {
+        setFormData({
+          email: user.email || "",
+          password: "",
+          phoneNumber: user.phoneNumber || "",
+          name: user.name || "",
+          role: user.role || "USER",
+        });
+      }
+    }, [user]);
+
+    const handleInputChange = (e) => {
+      const { name, value } = e.target;
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    };
+
+    const handleSubmit = (e) => {
+      e.preventDefault();
+      onSubmit(formData);
+    };
+
+    return (
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700">
+            Email
+          </label>
+          <input
+            type="email"
+            name="email"
+            value={formData.email}
+            onChange={handleInputChange}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2"
+            required
+          />
+        </div>
+
+        {!user && (
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Password
+            </label>
+            <input
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleInputChange}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2"
+              required={!user}
+            />
+          </div>
+        )}
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700">
+            Name
+          </label>
+          <input
+            type="text"
+            name="name"
+            value={formData.name}
+            onChange={handleInputChange}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2"
+            required
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700">
+            Phone Number
+          </label>
+          <input
+            type="tel"
+            name="phoneNumber"
+            value={formData.phoneNumber}
+            onChange={handleInputChange}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700">
+            Role
+          </label>
+          <select
+            name="role"
+            value={formData.role}
+            onChange={handleInputChange}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2"
+            required>
+            <option value="USER">User</option>
+            <option value="ADMIN">Admin</option>
+          </select>
+        </div>
+
+        <div className="flex justify-end gap-2 mt-4">
+          <button
+            type="submit"
+            className="px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded-md hover:bg-blue-600">
+            {user ? "Update" : "Create"}
+          </button>
+        </div>
+      </form>
+    );
+  };
+
   useEffect(() => {
     loadUsers();
   }, []);
 
   return (
-    <div className="container mx-auto px-4 py-4">
-      <h1 className="text-2xl font-bold mb-6">User Management</h1>
+    <div className="container mx-auto p-6">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">User Management</h1>
+        <button
+          onClick={() => setOpenEditDialog(true)}
+          className="flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+          <Plus size={20} />
+          Add User
+        </button>
+      </div>
 
-      <Snackbar
-        open={!!error}
-        autoHideDuration={6000}
-        onClose={() => setError(null)}
-        message={error}
-      />
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+          {error}
+        </div>
+      )}
 
-      <h2 className="text-xl font-semibold mb-4">Existing Users</h2>
-      
-      <div className="overflow-x-auto shadow-sm rounded-lg bg-white">
-        <table className="min-w-full bg-white border border-gray-300">
+      <div className="overflow-x-auto">
+        <table className="min-w-full bg-white border border-gray-200">
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -104,58 +228,70 @@ function Users() {
                 Email
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Name
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Role
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Phone
               </th>
-              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Actions
               </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
             {users.map((user) => (
-              <React.Fragment key={user.userID}>
-                <tr className="hover:bg-gray-50">
-                  <td className="px-6 py-4">{user.userID}</td>
-                  <td className="px-6 py-4">{user.email}</td>
-                  <td className="px-6 py-4">{user.role}</td>
-                  <td className="px-6 py-4">{user.phoneNumber}</td>
-                  <td className="px-6 py-4 text-center">
-                    <div className="flex justify-center space-x-2">
-                      <Button
-                        variant="outlined"
-                        color="primary"
-                        onClick={() => handleEditClick(user)}
-                        className="bg-blue-500 text-white hover:bg-blue-600 transition-all"
-                      >
-                        Edit
-                      </Button>
-                      <Button
-                        variant="outlined"
-                        color="secondary"
-                        onClick={() => handleDeleteUser(user.userID)}
-                        className="bg-red-500 text-white hover:bg-red-600 transition-all"
-                      >
-                        Delete
-                      </Button>
-                    </div>
-                  </td>
-                </tr>
-              </React.Fragment>
+              <tr key={user.userID} className="hover:bg-gray-50">
+                <td className="px-6 py-4 whitespace-nowrap">{user.userID}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{user.email}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{user.name}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{user.role}</td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  {user.phoneNumber}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleEditClick(user)}
+                      className="text-blue-600 hover:text-blue-800">
+                      <Pencil size={20} />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteUser(user.userID)}
+                      className="text-red-600 hover:text-red-800">
+                      <Trash2 size={20} />
+                    </button>
+                  </div>
+                </td>
+              </tr>
             ))}
           </tbody>
         </table>
       </div>
 
-      {/* Edit user dialog */}
-      <Dialog open={openEditDialog} onClose={handleCloseDialog} maxWidth="md">
-        <DialogTitle>Edit User</DialogTitle>
-        <DialogContent>
-          <UserForm onSubmit={handleUpdateUser} user={editUser} />
-        </DialogContent>
-      </Dialog>
+      {/* Modal for Add/Edit User */}
+      {openEditDialog && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white p-6 rounded-lg w-full max-w-md">
+            <h2 className="text-xl font-bold mb-4">
+              {editUser ? "Edit User" : "Add New User"}
+            </h2>
+            <UserForm
+              onSubmit={editUser ? handleUpdateUser : handleAddUser}
+              user={editUser}
+            />
+            <div className="flex justify-end gap-2 mt-4">
+              <button
+                onClick={handleCloseDialog}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200">
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

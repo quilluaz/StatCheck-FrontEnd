@@ -1,1 +1,0 @@
-// Remove this file as we're using cookies now
