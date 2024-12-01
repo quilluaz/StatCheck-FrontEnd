@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import Navbar from '../components/UserNavbar'; // Import Navbar component
-import { fetchParkingLots, createReservation } from '../services/ParkingReservationAPI'; // Adjusted to use your API functions
+import Navbar from '../components/UserNavbar';
+// import { fetchParkingLots, createReservation } from '../services/ParkingReservationAPI'
 
 const API_URL = "/api";
 

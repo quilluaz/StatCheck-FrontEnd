@@ -5,7 +5,7 @@ import {
   fetchCurrentUserProfile,
   updateUserProfile,
   changePassword,
-} from "../services/UserProfileApi";
+} from "../services/UserAPI/UserProfileApi";
 import { useAuth } from "../contexts/AuthContext";
 
 function UserProfile() {

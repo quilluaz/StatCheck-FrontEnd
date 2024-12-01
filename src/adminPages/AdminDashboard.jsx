@@ -18,11 +18,13 @@ import { LuSchool2 } from "react-icons/lu";
 import { VscNotebook } from "react-icons/vsc";
 import { FaRegCalendarPlus } from "react-icons/fa";
 import { TiDocumentText } from "react-icons/ti";
+import { BiBook } from "react-icons/bi";
 
 const menuItems = [
   { name: "Analytics", icon: ChartBarIcon, path: "analytics" },
   { name: "Buildings", icon: LuSchool2, path: "buildings" },
-  { name: "Library", icon: IoLibraryOutline, path: "library" },
+  { name: "Libraries", icon: BiBook, path: "libraries" },
+  { name: "Library Rooms", icon: IoLibraryOutline, path: "library-rooms" },
   {
     name: "Library Reservations",
     icon: FaRegCalendarPlus,
@@ -37,7 +39,6 @@ const menuItems = [
   { name: "Rooms", icon: MdOutlineDoorFront, path: "rooms" },
   { name: "Schedule", icon: MdSchedule, path: "schedule" },
   { name: "Subjects", icon: VscNotebook, path: "subjects" },
-  { name: "Time Slot", icon: TiDocumentText, path: "timeslot" },
   { name: "Users", icon: UsersIcon, path: "users" },
 ];
 
