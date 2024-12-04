@@ -1,147 +1,55 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
+import { ChevronDown, User, Menu, LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import {
-  FaUser,
-  FaSignOutAlt,
-  FaChevronDown,
-  FaBars,
-  FaTimes,
-} from "react-icons/fa";
 import { useAuth } from "../contexts/AuthContext";
 import UserImgIcon from "../assets/lex.png";
 
-function Navbar() {
-  const [activeDropdown, setActiveDropdown] = useState(null);
+const NavItem = ({ href, children }) => (
+  <a
+    href={href}
+    className="block px-3 py-2 rounded-md text-white font-bold relative group transition-transform hover:scale-105">
+    <span className="relative z-10 group-hover:text-gold transition-colors duration-300">
+      {children}
+    </span>
+    <div className="absolute bottom-0 left-0 w-full h-0.5 bg-gold transform scale-x-0 group-hover:animate-underline-lr"></div>
+  </a>
+);
+
+export default function UserNavbar() {
+  const [isOpen, setIsOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  const handleDropdownToggle = (menu) => {
-    setActiveDropdown(activeDropdown === menu ? null : menu);
-  };
-
-  const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen);
-  };
-
-  return (
-    <nav className="bg-[#8a333b] text-[#ffffff] p-4">
-      <div className="container mx-auto flex items-center justify-between">
-        <div className="flex items-center space-x-6">
-          <a href="/home" className="text-xl font-bold ml-4 mr-8">
-            StatCheck
-          </a>
-          <div className="hidden md:flex items-center space-x-6">
-            <NavItems
-              handleDropdownToggle={handleDropdownToggle}
-              activeDropdown={activeDropdown}
-            />
-          </div>
-        </div>
-        <div className="hidden md:block relative">
-          <UserMenu
-            handleDropdownToggle={handleDropdownToggle}
-            activeDropdown={activeDropdown}
-          />
-        </div>
-        <button className="md:hidden" onClick={toggleMobileMenu}>
-          {isMobileMenuOpen ? <FaTimes /> : <FaBars />}
-        </button>
-      </div>
-      {isMobileMenuOpen && (
-        <div className="md:hidden mt-4">
-          <NavItems
-            handleDropdownToggle={handleDropdownToggle}
-            activeDropdown={activeDropdown}
-          />
-          <UserMenu
-            handleDropdownToggle={handleDropdownToggle}
-            activeDropdown={activeDropdown}
-          />
-        </div>
-      )}
-    </nav>
-  );
-}
-
-function NavItems({ handleDropdownToggle, activeDropdown }) {
-  return (
-    <ul className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-6">
-      <li>
-        <a href="/home" className="hover:text-gray-300 transition duration-200">
-          Home
-        </a>
-      </li>
-      <li className="relative">
-        <button
-          onClick={() => handleDropdownToggle("buildings")}
-          className="flex items-center hover:text-gray-300 transition duration-200">
-          Buildings <FaChevronDown className="ml-1" />
-        </button>
-        {activeDropdown === "buildings" && (
-          <ul className="mt-2 md:absolute md:left-0 w-40 bg-[#a33c45] rounded-md shadow-lg py-2 z-10">
-            <li>
-              <a
-                href="/buildings/rtl"
-                className="block px-4 py-2 hover:bg-[#8a333b] transition duration-200 text-[#ffffff]">
-                RTL
-              </a>
-            </li>
-            <li>
-              <a
-                href="/buildings/nge"
-                className="block px-4 py-2 hover:bg-[#8a333b] transition duration-200 text-[#ffffff]">
-                NGE
-              </a>
-            </li>
-            <li>
-              <a
-                href="/buildings/gle"
-                className="block px-4 py-2 hover:bg-[#8a333b] transition duration-200 text-[#ffffff]">
-                GLE
-              </a>
-            </li>
-          </ul>
-        )}
-      </li>
-      <li className="relative">
-        <button
-          onClick={() => handleDropdownToggle("reservations")}
-          className="flex items-center hover:text-gray-300 transition duration-200">
-          Reservations <FaChevronDown className="ml-1" />
-        </button>
-        {activeDropdown === "reservations" && (
-          <ul className="mt-2 md:absolute md:left-0 w-40 bg-[#a33c45] rounded-md shadow-lg py-2 z-10">
-            <li>
-              <a
-                href="/reservations/library"
-                className="block px-4 py-2 hover:bg-[#8a333b] transition duration-200 text-[#ffffff]">
-                Library Rooms
-              </a>
-            </li>
-            <li>
-              <a
-                href="/reservations/parking"
-                className="block px-4 py-2 hover:bg-[#8a333b] transition duration-200 text-[#ffffff]">
-                Parking Slot
-              </a>
-            </li>
-          </ul>
-        )}
-      </li>
-      <li>
-        <a
-          href="/about"
-          className="hover:text-gray-300 transition duration-200">
-          About
-        </a>
-      </li>
-    </ul>
-  );
-}
-
-function UserMenu({ handleDropdownToggle, activeDropdown }) {
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const navigate = useNavigate();
   const { logout } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+
+  // Add refs for timeout handlers
+  const closeReservationTimeout = useRef(null);
+  const closeUserMenuTimeout = useRef(null);
+
+  // Function to handle dropdown closing with delay
+  const handleMouseLeave = (dropdownSetter, timeoutRef) => {
+    timeoutRef.current = setTimeout(() => {
+      dropdownSetter(false);
+    }, 500); // 500ms delay before closing
+  };
+
+  // Function to cancel closing if mouse returns
+  const handleMouseEnter = (timeoutRef) => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+  };
+
+  // Cleanup timeouts on unmount
+  useEffect(() => {
+    return () => {
+      if (closeReservationTimeout.current)
+        clearTimeout(closeReservationTimeout.current);
+      if (closeUserMenuTimeout.current)
+        clearTimeout(closeUserMenuTimeout.current);
+    };
+  }, []);
 
   const handleLogout = async (e) => {
     e.preventDefault();
@@ -157,38 +65,140 @@ function UserMenu({ handleDropdownToggle, activeDropdown }) {
   };
 
   return (
-    <div className="mt-4 md:mt-0 mr-3">
-      <button
-        onClick={() => handleDropdownToggle("user")}
-        className="flex items-center justify-center w-10 h-10 bg-[#993404] rounded-full hover:bg-gray-500 transition duration-200 text-[#fff7bc]">
-        <img
-          src={UserImgIcon}
-          alt="User Profile"
-          className="mx-auto rounded-full"
-        />
-      </button>
-      {activeDropdown === "user" && (
-        <ul className="mt-2 md:absolute md:right-0 w-40 bg-[#a33c45] rounded-md shadow-lg py-2 z-10">
-          <li>
-            <a
-              href="/user-profile"
-              className="flex items-center px-4 py-2 hover:bg-[#8a333b] transition duration-200 text-[#ffffff]">
-              <FaUser className="mr-2" /> User Profile
+    <nav className="bg-maroon shadow-lg sticky top-0 z-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
+          <div className="flex items-center">
+            <a href="/home" className="flex-shrink-0">
+              <span className="text-white text-2xl font-bold">StatCheck</span>
             </a>
-          </li>
-          <li>
+            <div className="hidden md:block">
+              <div className="ml-10 flex items-baseline space-x-4">
+                <NavItem href="/home">Home</NavItem>
+                <NavItem href="/buildings">Buildings</NavItem>
+                <div
+                  className="relative"
+                  onMouseEnter={() => handleMouseEnter(closeReservationTimeout)}
+                  onMouseLeave={() =>
+                    handleMouseLeave(setIsOpen, closeReservationTimeout)
+                  }>
+                  <button
+                    onClick={() => setIsOpen(!isOpen)}
+                    className="flex items-center px-3 py-2 text-white font-bold transition-colors hover:text-gold">
+                    Reservations
+                    <ChevronDown className="ml-1 h-4 w-4" />
+                  </button>
+                  {isOpen && (
+                    <div className="absolute z-10 left-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 overflow-hidden">
+                      <div className="py-1">
+                        <a
+                          href="/reservations/library"
+                          className="block px-4 py-2 text-sm text-maroon relative overflow-hidden group">
+                          <span className="relative z-10 group-hover:text-white transition-colors duration-300">
+                            Library Rooms
+                          </span>
+                          <div className="absolute inset-0 bg-maroon transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
+                        </a>
+                        <a
+                          href="/reservations/parking"
+                          className="block px-4 py-2 text-sm text-maroon relative overflow-hidden group">
+                          <span className="relative z-10 group-hover:text-white transition-colors duration-300">
+                            Parking Slot
+                          </span>
+                          <div className="absolute inset-0 bg-maroon transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
+                        </a>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                <NavItem href="/about">About</NavItem>
+              </div>
+            </div>
+          </div>
+          <div className="hidden md:block">
+            <div className="ml-4 flex items-center md:ml-6">
+              <div
+                className="relative"
+                onMouseEnter={() => handleMouseEnter(closeUserMenuTimeout)}
+                onMouseLeave={() =>
+                  handleMouseLeave(setIsUserMenuOpen, closeUserMenuTimeout)
+                }>
+                <button
+                  onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                  className="p-1 rounded-full text-white hover:text-gold focus:outline-none">
+                  <img
+                    src={UserImgIcon}
+                    alt="User Profile"
+                    className="h-9 w-9 rounded-full"
+                  />
+                </button>
+                {isUserMenuOpen && (
+                  <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 overflow-hidden">
+                    <div className="py-1">
+                      <a
+                        href="/user-profile"
+                        className="block px-4 py-2 text-sm text-maroon relative overflow-hidden group">
+                        <span className="relative z-10 group-hover:text-white transition-colors duration-300">
+                          <User className="inline-block h-4 w-4 mr-2" />
+                          User Profile
+                        </span>
+                        <div className="absolute inset-0 bg-maroon transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
+                      </a>
+                      <button
+                        onClick={handleLogout}
+                        disabled={isLoading}
+                        className="w-full text-left px-4 py-2 text-sm text-maroon relative overflow-hidden group">
+                        <span className="relative z-10 group-hover:text-white transition-colors duration-300">
+                          <LogOut className="inline-block h-4 w-4 mr-2" />
+                          {isLoading ? "Signing out..." : "Sign Out"}
+                        </span>
+                        <div className="absolute inset-0 bg-maroon transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+          <div className="md:hidden">
             <button
-              onClick={handleLogout}
-              disabled={isLoading}
-              className="w-full flex items-center px-4 py-2 hover:bg-[#8a333b] transition duration-200 text-[#ffffff]">
-              <FaSignOutAlt className="mr-2" />
-              {isLoading ? "Signing out..." : "Sign Out"}
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="inline-flex items-center justify-center p-2 rounded-md text-white hover:text-gold focus:outline-none">
+              <Menu className="h-6 w-6" />
             </button>
-          </li>
-        </ul>
-      )}
-    </div>
+          </div>
+        </div>
+
+        {isMobileMenuOpen && (
+          <div className="md:hidden">
+            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+              <NavItem href="/home">Home</NavItem>
+              <NavItem href="/buildings">Buildings</NavItem>
+              <button
+                onClick={() => setIsOpen(!isOpen)}
+                className="w-full text-left px-3 py-2 text-white font-bold transition-colors hover:text-gold">
+                Reservations
+              </button>
+              {isOpen && (
+                <div className="pl-4">
+                  <NavItem href="/reservations/library">Library Rooms</NavItem>
+                  <NavItem href="/reservations/parking">Parking Slot</NavItem>
+                </div>
+              )}
+              <NavItem href="/about">About</NavItem>
+              <div className="border-t border-gray-200 pt-4">
+                <NavItem href="/user-profile">Profile</NavItem>
+                <button
+                  onClick={handleLogout}
+                  disabled={isLoading}
+                  className="w-full text-left px-3 py-2 text-white font-bold transition-colors hover:text-gold">
+                  {isLoading ? "Signing out..." : "Sign Out"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </nav>
   );
 }
-
-export default Navbar;
