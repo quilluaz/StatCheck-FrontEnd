@@ -6,21 +6,22 @@ const BuildingsRTL = () => {
   const [buildingDetails, setBuildingDetails] = useState(null);
   const [rooms, setRooms] = useState([]);
   const [totalOccupants, setTotalOccupants] = useState(null);
+  const [selectedFloor, setSelectedFloor] = useState(1); // New state for selected floor
 
   useEffect(() => {
     const fetchBuildingAndRooms = async () => {
       try {
-        // Fetch building details for RTL (e.g., Building ID is 3)
-        const building = await getBuildingById(2); // Assume Building ID 3 for RTL
+        const building = await getBuildingById(2); // Fetch building details for RTL
         setBuildingDetails(building);
-        
-        // Fetch total occupants for the building
-        const occupants = await getTotalOccupants(2);
+
+        const occupants = await getTotalOccupants(2); // Fetch total occupants
         setTotalOccupants(occupants);
 
-        // Fetch rooms associated with the building
-        const roomsData = await getAllRooms();
-        setRooms(roomsData);  // If you need rooms specific to the building, adjust API accordingly
+        const roomsData = await getAllRooms(); // Fetch all rooms
+        const filteredRooms = roomsData.filter(
+          (room) => room.building.buildingName === 'RTL' // Filter for RTL rooms
+        );
+        setRooms(filteredRooms);
       } catch (error) {
         console.error('Error fetching building or rooms for RTL:', error);
       }
@@ -29,9 +30,24 @@ const BuildingsRTL = () => {
     fetchBuildingAndRooms();
   }, []);
 
+  // Function to generate room name based on floor number and index
+  const generateRoomName = (floorNumber, index) => {
+    return `RTL${floorNumber}0${index}`; // Example: RTL100, RTL101, etc.
+  };
+
+  // Handle dropdown change
+  const handleFloorChange = (event) => {
+    setSelectedFloor(event.target.value);
+  };
+
+  // Filter rooms based on selected floor
+  const filteredRooms = selectedFloor === 'All'
+    ? rooms
+    : rooms.filter((room) => room.floorNumber === parseInt(selectedFloor));
+
   return (
     <div>
-      <h1>Building RTL Details</h1>
+      <h1>Don Rodulfo T. Lizarres Building (RTL)</h1>
 
       {buildingDetails && (
         <div>
@@ -41,16 +57,29 @@ const BuildingsRTL = () => {
         </div>
       )}
 
+      {/* Dropdown to select floor */}
+      <div>
+        <label htmlFor="floorSelect">Select Floor: </label>
+        <select id="floorSelect" value={selectedFloor} onChange={handleFloorChange}>
+          <option value="All">All Floors</option>
+          {[...new Set(rooms.map((room) => room.floorNumber))].map((floor) => (
+            <option key={floor} value={floor}>
+              Floor {floor}
+            </option>
+          ))}
+        </select>
+      </div>
+
       <h2>Rooms in RTL</h2>
       <ul>
-        {rooms.map((room) => (
+        {filteredRooms.map((room, index) => (
           <li key={room.id}>
-            <strong>{room.roomType}</strong><br />
+            <strong>{generateRoomName(room.floorNumber, index + 1)}</strong><br />
+            Room Type: {room.roomType}<br />
             Capacity: {room.capacity}<br />
             Current Capacity: {room.currentCapacity}<br />
             Availability Status: {room.availabilityStatus}<br />
             Floor Number: {room.floorNumber}<br />
-            Building: {room.building.name}
           </li>
         ))}
       </ul>
@@ -59,3 +88,6 @@ const BuildingsRTL = () => {
 };
 
 export default BuildingsRTL;
+
+
+

@@ -1,21 +1,32 @@
 import React, { useState, useEffect } from 'react';
-import { getAllRooms, getRoomById } from '../services/UserAPI/RoomAPI';
-import { getAllBuildings, getBuildingById, getTotalOccupants } from '../services/UserAPI/BuildingAPI';
+import { getAllRooms } from '../services/UserAPI/RoomAPI';
+import { getAllBuildings } from '../services/UserAPI/BuildingAPI';
 
 const Buildings = () => {
   const [rooms, setRooms] = useState([]);
-  const [buildings, setBuildings] = useState([]);;
+  const [buildings, setBuildings] = useState([]);
+  const [roomCountByBuilding, setRoomCountByBuilding] = useState({}); // State for room counts per building
 
   // Fetch all rooms and buildings on component mount
   useEffect(() => {
     const fetchRoomsAndBuildings = async () => {
       try {
         const roomData = await getAllRooms();
+        const buildingData = await getAllBuildings();
+
         if (roomData) {
           setRooms(roomData);
+
+          // Calculate room count per building
+          const countByBuilding = roomData.reduce((acc, room) => {
+            const buildingName = room.building.buildingName; // Assumes room object has building reference
+            acc[buildingName] = (acc[buildingName] || 0) + 1;
+            return acc;
+          }, {});
+
+          setRoomCountByBuilding(countByBuilding);
         }
 
-        const buildingData = await getAllBuildings();
         if (buildingData) {
           setBuildings(buildingData);
         }
@@ -23,48 +34,29 @@ const Buildings = () => {
         console.error('Failed to fetch data:', error);
       }
     };
+
     fetchRoomsAndBuildings();
   }, []);
-
-
-
-  // Fetch a building by ID (for displaying details)
-  const handleFetchBuilding = async (buildingID) => {
-    try {
-      const building = await getBuildingById(buildingID);
-      setSelectedBuilding(building);
-
-      // Fetch the total occupants of the selected building
-      const occupantsData = await getTotalOccupants(buildingID);
-      if (occupantsData && occupantsData.totalOccupants !== undefined) {
-        setTotalOccupants(occupantsData.totalOccupants);
-      } else {
-        setTotalOccupants('N/A'); // Handle case if no data is returned
-      }
-    } catch (error) {
-      console.error(`Failed to fetch building with ID ${buildingID}:`, error);
-    }
-  };
 
   return (
     <div>
       <h1>Building and Room List</h1>
 
-      {/* List of buildings */}
+      {/* List of buildings with room count */}
       <h2>Buildings</h2>
       <ul>
         {buildings.map((building) => (
-          <li key={building.id}> {/* Adjust the key to the correct field */}
+          <li key={building.id}>
             <strong>Name:</strong> {building.buildingName} <br />
             <strong>Floors:</strong> {building.floors} <br />
+            <strong>Total Rooms:</strong>{' '}
+            {roomCountByBuilding[building.buildingName] || 0} <br />
           </li>
         ))}
       </ul>
-
-  
-
     </div>
   );
 };
 
 export default Buildings;
+

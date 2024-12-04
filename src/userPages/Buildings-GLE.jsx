@@ -1,104 +1,88 @@
 import React, { useState, useEffect } from 'react';
-import { getAllRooms, getRoomById } from '../services/UserAPI/RoomAPI';
-import { getAllBuildings, getBuildingById, getTotalOccupants } from '../services/UserAPI/BuildingAPI';
+import { getBuildingById, getTotalOccupants } from '../services/UserAPI/BuildingAPI';
+import { getAllRooms } from '../services/UserAPI/RoomAPI';
 
 const BuildingsGLE = () => {
+  const [buildingDetails, setBuildingDetails] = useState(null);
   const [rooms, setRooms] = useState([]);
-  const [buildings, setBuildings] = useState([]);
-  const [selectedRoom, setSelectedRoom] = useState(null);
-  const [selectedBuilding, setSelectedBuilding] = useState(null);
   const [totalOccupants, setTotalOccupants] = useState(null);
+  const [selectedFloor, setSelectedFloor] = useState(1); // Default to Floor 1
 
-  // Fetch all rooms and buildings on component mount
   useEffect(() => {
-    const fetchRoomsAndBuildings = async () => {
+    const fetchBuildingAndRooms = async () => {
       try {
-        const roomData = await getAllRooms();
-        if (roomData) {
-          setRooms(roomData);
-        }
+        const building = await getBuildingById(1); // Fetch building details for GLE (Assume ID 3)
+        setBuildingDetails(building);
 
-        const buildingData = await getAllBuildings();
-        if (buildingData) {
-          setBuildings(buildingData);
-        }
+        const occupants = await getTotalOccupants(1); // Fetch total occupants for GLE
+        setTotalOccupants(occupants);
+
+        const roomsData = await getAllRooms(); // Fetch all rooms
+        const filteredRooms = roomsData.filter(
+          (room) => room.building.buildingName === 'GLE' // Filter for GLE rooms
+        );
+        setRooms(filteredRooms);
       } catch (error) {
-        console.error('Failed to fetch data:', error);
+        console.error('Error fetching building or rooms for GLE:', error);
       }
     };
-    fetchRoomsAndBuildings();
+
+    fetchBuildingAndRooms();
   }, []);
 
-  // Fetch a room by ID (for displaying details)
-  const handleFetchRoom = async (roomId) => {
-    try {
-      const room = await getRoomById(roomId);
-      setSelectedRoom(room);
-    } catch (error) {
-      console.error(`Failed to fetch room with ID ${roomId}:`, error);
-    }
+  // Function to generate room name based on floor number and index
+  const generateRoomName = (floorNumber, index) => {
+    return `GLE${floorNumber}0${index}`; // Example: GLE100, GLE101, etc.
   };
 
-  // Fetch a building by ID (for displaying details)
-  const handleFetchBuilding = async (buildingID) => {
-    try {
-      const building = await getBuildingById(buildingID);
-      setSelectedBuilding(building);
-
-      // Fetch the total occupants of the selected building
-      const occupantsData = await getTotalOccupants(buildingID);
-      if (occupantsData && occupantsData.totalOccupants !== undefined) {
-        setTotalOccupants(occupantsData.totalOccupants);
-      } else {
-        setTotalOccupants('N/A'); // Handle case if no data is returned
-      }
-    } catch (error) {
-      console.error(`Failed to fetch building with ID ${buildingID}:`, error);
-    }
+  // Handle dropdown change
+  const handleFloorChange = (event) => {
+    setSelectedFloor(event.target.value);
   };
+
+  // Filter rooms based on selected floor
+  const filteredRooms = selectedFloor === 'All'
+    ? rooms
+    : rooms.filter((room) => room.floorNumber === parseInt(selectedFloor));
 
   return (
     <div>
-      <h1>Building and Room List</h1>
+      <h1>Gonzaga Learning Environment Building (GLE)</h1>
 
-      {/* List of buildings */}
-      <h2>Buildings</h2>
-      <ul>
-        {buildings.map((building) => (
-          <li key={building.id}> {/* Adjust the key to the correct field */}
-            <strong>Name:</strong> {building.buildingName} <br />
-            <strong>Floors:</strong> {building.floors} <br />
-            <button onClick={() => handleFetchBuilding(building.id)}>View Building Details</button> {/* Adjust property names */}
-          </li>
-        ))}
-      </ul>
-
-      {/* Selected building details */}
-      {selectedBuilding && (
+      {buildingDetails && (
         <div>
-          <h3>Building Details</h3>
-          <p><strong>ID:</strong> {selectedBuilding.id}</p> {/* Adjust property names */}
-          <p><strong>Name:</strong> {selectedBuilding.name}</p>
-          <p><strong>Location:</strong> {selectedBuilding.location}</p>
-          <p><strong>Total Occupants:</strong> {totalOccupants}</p> {/* Display total occupants */}
+          <h2>{buildingDetails.buildingName}</h2>
+          <p>{buildingDetails.location}</p>
+          <p>Total Occupants: {totalOccupants}</p>
         </div>
       )}
 
-      {/* List of rooms */}
-      <h2>Rooms</h2>
+      {/* Dropdown to select floor */}
+      <div>
+        <label htmlFor="floorSelect">Select Floor: </label>
+        <select id="floorSelect" value={selectedFloor} onChange={handleFloorChange}>
+          <option value="All">All Floors</option>
+          {[...new Set(rooms.map((room) => room.floorNumber))].map((floor) => (
+            <option key={floor} value={floor}>
+              Floor {floor}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <h2>Rooms in GLE</h2>
       <ul>
-        {rooms.map((room) => (
-          <li key={room.id}> {/* Adjust the key to the correct field */}
-            <strong>Name:</strong> {room.name} <br />
-            <strong>Capacity:</strong> {room.capacity} <br />
-            <strong>Current Capacity:</strong> {room.currentCapacity} <br />
-            <strong>Location:</strong> {room.roomType} <br />
-            <strong>Availability:</strong> {room.availabilityStatus} <br />
-            <button onClick={() => handleFetchRoom(room.id)}>View Room Details</button> {/* Adjust property names */}
+        {filteredRooms.map((room, index) => (
+          <li key={room.id}>
+            <strong>{generateRoomName(room.floorNumber, index + 1)}</strong><br />
+            Room Type: {room.roomType}<br />
+            Capacity: {room.capacity}<br />
+            Current Capacity: {room.currentCapacity}<br />
+            Availability Status: {room.availabilityStatus}<br />
+            Floor Number: {room.floorNumber}<br />
           </li>
         ))}
       </ul>
-
     </div>
   );
 };
