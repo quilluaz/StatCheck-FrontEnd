@@ -4,10 +4,7 @@ import { getAllBuildings, getBuildingById, getTotalOccupants } from '../services
 
 const Buildings = () => {
   const [rooms, setRooms] = useState([]);
-  const [buildings, setBuildings] = useState([]);
-  const [selectedRoom, setSelectedRoom] = useState(null);
-  const [selectedBuilding, setSelectedBuilding] = useState(null);
-  const [totalOccupants, setTotalOccupants] = useState(null);
+  const [buildings, setBuildings] = useState([]);;
 
   // Fetch all rooms and buildings on component mount
   useEffect(() => {
@@ -29,15 +26,7 @@ const Buildings = () => {
     fetchRoomsAndBuildings();
   }, []);
 
-  // Fetch a room by ID (for displaying details)
-  const handleFetchRoom = async (roomId) => {
-    try {
-      const room = await getRoomById(roomId);
-      setSelectedRoom(room);
-    } catch (error) {
-      console.error(`Failed to fetch room with ID ${roomId}:`, error);
-    }
-  };
+
 
   // Fetch a building by ID (for displaying details)
   const handleFetchBuilding = async (buildingID) => {
@@ -68,36 +57,11 @@ const Buildings = () => {
           <li key={building.id}> {/* Adjust the key to the correct field */}
             <strong>Name:</strong> {building.buildingName} <br />
             <strong>Floors:</strong> {building.floors} <br />
-            <button onClick={() => handleFetchBuilding(building.id)}>View Building Details</button> {/* Adjust property names */}
           </li>
         ))}
       </ul>
 
-      {/* Selected building details */}
-      {selectedBuilding && (
-        <div>
-          <h3>Building Details</h3>
-          <p><strong>ID:</strong> {selectedBuilding.id}</p> {/* Adjust property names */}
-          <p><strong>Name:</strong> {selectedBuilding.name}</p>
-          <p><strong>Location:</strong> {selectedBuilding.location}</p>
-          <p><strong>Total Occupants:</strong> {totalOccupants}</p> {/* Display total occupants */}
-        </div>
-      )}
-
-      {/* List of rooms */}
-      <h2>Rooms</h2>
-      <ul>
-        {rooms.map((room) => (
-          <li key={room.id}> {/* Adjust the key to the correct field */}
-            <strong>Name:</strong> {room.name} <br />
-            <strong>Capacity:</strong> {room.capacity} <br />
-            <strong>Current Capacity:</strong> {room.currentCapacity} <br />
-            <strong>Location:</strong> {room.roomType} <br />
-            <strong>Availability:</strong> {room.availabilityStatus} <br />
-            <button onClick={() => handleFetchRoom(room.id)}>View Room Details</button> {/* Adjust property names */}
-          </li>
-        ))}
-      </ul>
+  
 
     </div>
   );
