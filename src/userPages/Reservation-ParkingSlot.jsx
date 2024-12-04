@@ -1,24 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from '../components/UserNavbar';
-import { ParkingLotAPI } from '../services/AdminAPI/ParkingLotAPI'; // Importing the API functions
+import { ParkingLotAPI } from '../services/AdminAPI/ParkingLotAPI';
 import { ParkingReservationAPI } from '../services/AdminAPI/ParkingReservationAPI';
-const API_URL = "/api";
 
 function ParkingLot() {
   const [parkingLots, setParkingLots] = useState([]);
   const [selectedLot, setSelectedLot] = useState(null);
   const [availableSpaces, setAvailableSpaces] = useState([]);
   const [selectedSpot, setSelectedSpot] = useState(null);
+  const [reservationDate, setReservationDate] = useState(() => {
+    const today = new Date();
+    return today.toISOString().split('T')[0]; // Default to today's date
+  });
   const [startTime, setStartTime] = useState('');
   const [endTime, setEndTime] = useState('');
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
 
-  // Fetch parking lots when the component mounts
   useEffect(() => {
     const loadParkingLots = async () => {
       try {
-        const response = await ParkingLotAPI.getAllParkingLots(); // Fetch all parking lots
+        const response = await ParkingLotAPI.getAllParkingLots();
         setParkingLots(response);
       } catch (err) {
         setError('Failed to load parking lots.');
@@ -27,41 +29,38 @@ function ParkingLot() {
     loadParkingLots();
   }, []);
 
-  // Update available spaces when a parking lot is selected
   useEffect(() => {
     if (selectedLot) {
       const lot = parkingLots.find(lot => lot.parkingLotID === selectedLot);
       if (lot) {
-        setAvailableSpaces(lot.parkingSpaces); // Setting the available spaces for the selected lot
+        setAvailableSpaces(lot.parkingSpaces);
       }
     }
   }, [selectedLot, parkingLots]);
 
-  // Handle parking spot reservation
   const handleReserve = async () => {
-    if (selectedSpot && startTime && endTime) {
+    if (selectedSpot && reservationDate && startTime && endTime) {
       try {
-        const today = new Date().toISOString().split("T")[0]; // Get today's date in 'YYYY-MM-DD' format
-        const startDateTime = new Date(`${today}T${startTime}:00`).toISOString(); // Full start datetime
-        const endDateTime = new Date(`${today}T${endTime}:00`).toISOString(); // Full end datetime
+        const startDateTime = new Date(`${reservationDate}T${startTime}:00`).toISOString();
+        const endDateTime = new Date(`${reservationDate}T${endTime}:00`).toISOString();
 
-        // Send reservation request via ParkingReservationAPI
         await ParkingReservationAPI.createReservation({
           parkingSpace: { parkingSpaceId: selectedSpot },
-          userEntity: { userID: 1 }, // You might want to dynamically get the user's ID
+          userEntity: { userID: 1 },
           reservationStartTime: startDateTime,
           reservationEndTime: endDateTime,
         });
 
         setMessage(`Reserved spot ${selectedSpot} from ${startDateTime} to ${endDateTime}`);
         setSelectedSpot(null);
+        setReservationDate(new Date().toISOString().split('T')[0]); // Reset to today's date
         setStartTime('');
         setEndTime('');
       } catch (err) {
         setError('Failed to reserve parking spot.');
       }
     } else {
-      setError('Please select a spot and set valid start and end times.');
+      setError('Please select a date, time, and a spot.');
     }
   };
 
@@ -69,14 +68,12 @@ function ParkingLot() {
     <div className="flex flex-col min-h-screen" style={{ backgroundImage: `url('/images/wallpeps.png')`, backgroundSize: 'cover', backgroundRepeat: 'no-repeat', backgroundPosition: 'center' }}>
       <Navbar />
       <main className="flex-grow container mx-auto px-4 py-8">
-        {/* Reservation Header Section */}
         <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
           <h2 className="text-4xl font-bold mb-6 text-left text-black">
             {selectedLot ? `Reservations for ${parkingLots.find(lot => lot.parkingLotID === selectedLot)?.parkingLotName}` : 'Parking Lot Reservations'}
           </h2>
         </div>
 
-        {/* Parking Lot Selection or Reservation Details */}
         {!selectedLot ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             {parkingLots.map((lot) => (
@@ -92,9 +89,21 @@ function ParkingLot() {
           </div>
         ) : (
           <div className="flex">
-            {/* Left side: Reservation form */}
             <div className="w-1/3 bg-gray-100 p-4 rounded-lg shadow-lg">
               <h3 className="text-xl font-semibold mb-4">Create Reservation</h3>
+              <div className="mb-4">
+                <label htmlFor="reservation-date" className="block text-sm font-medium">
+                  Date
+                </label>
+                <input
+                  type="date"
+                  id="reservation-date"
+                  value={reservationDate}
+                  onChange={(e) => setReservationDate(e.target.value)}
+                  min={new Date().toISOString().split('T')[0]} // Prevent selecting past dates
+                  className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md"
+                />
+              </div>
               <div className="mb-4">
                 <label htmlFor="start-time" className="block text-sm font-medium">
                   Start Time
@@ -121,8 +130,8 @@ function ParkingLot() {
               </div>
               <button
                 onClick={handleReserve}
-                disabled={!selectedSpot || !startTime || !endTime}
-                className={`w-full py-2 rounded-md ${selectedSpot && startTime && endTime ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-gray-400 text-gray-700 cursor-not-allowed'}`}
+                disabled={!selectedSpot || !reservationDate || !startTime || !endTime}
+                className={`w-full py-2 rounded-md ${selectedSpot && reservationDate && startTime && endTime ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-gray-400 text-gray-700 cursor-not-allowed'}`}
               >
                 Book Now
               </button>
@@ -133,8 +142,6 @@ function ParkingLot() {
                 Back to Parking Lots
               </button>
             </div>
-
-            {/* Right side: Available spots */}
             <div className="w-2/3 ml-8">
               <h3 className="text-2xl font-semibold mb-4">Available Spots</h3>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -142,7 +149,7 @@ function ParkingLot() {
                   <button
                     key={space.parkingSpaceId}
                     onClick={() => setSelectedSpot(space.parkingSpaceId)}
-                    className={`w-full p-4 bg-white border rounded-lg shadow-sm text-center hover:bg-blue-100 ${selectedSpot === space.parkingSpaceId ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                    className={`w-full p-4 border rounded-lg shadow-sm text-center hover:bg-blue-100 ${selectedSpot === space.parkingSpaceId ? 'bg-blue-500 text-white' : (space.status === 'RESERVED' ? 'bg-yellow-500' : 'bg-green-200')}`}
                   >
                     <div>{space.parkingName}</div>
                     <div className="text-sm">{space.status}</div>
@@ -155,7 +162,6 @@ function ParkingLot() {
         )}
       </main>
 
-      {/* Error or Success message */}
       {message && (
         <div className="bg-green-50 border-l-4 border-green-500 p-4 mb-4 text-green-700">
           {message}

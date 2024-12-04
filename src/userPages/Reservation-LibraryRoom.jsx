@@ -120,9 +120,17 @@ function LibraryRoom() {
 
   // Confirm booking action
   const handleConfirmBooking = () => {
-    // Handle actual booking logic here
-    alert(`Booking confirmed for schedule ${formatScheduleTime(selectedSchedule)}`)
-    setShowModal(false)
+    const today = new Date().toISOString().split("T")[0]; // Get today's date in 'YYYY-MM-DD' format
+    const bookingDateTime = `${today} ${formatScheduleTime(selectedSchedule)}`; // Combine date with time
+    alert(`Booking confirmed for schedule: ${bookingDateTime}`);
+    
+    // Close the modal
+    setShowModal(false);
+    
+    // Use setTimeout to ensure the modal closes before reloading
+    setTimeout(() => {
+      window.location.reload();
+    }, 100); // Delay for 100 milliseconds
   }
 
   // Cancel booking action
