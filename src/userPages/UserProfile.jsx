@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
 import Navbar from "../components/UserNavbar";
 import profileImage from "../assets/lex.png";
+import facebookImage from "../assets/fb.svg";
+import instagramImage from "../assets/instagram.png";
+import twitterImage from "../assets/twitter.webp";
 import {
   fetchCurrentUserProfile,
   updateUserProfile,
@@ -71,6 +74,9 @@ function UserProfile() {
         name: editableProfile.name,
         email: editableProfile.email,
         phoneNumber: editableProfile.phoneNumber,
+        socialMediaFacebook: editableProfile.socialMediaFacebook,
+        socialMediaInstagram: editableProfile.socialMediaInstagram,
+        socialMediaTwitter: editableProfile.socialMediaTwitter,
         role: userProfile.role, // Preserve the existing role
       };
 
@@ -178,6 +184,90 @@ function UserProfile() {
             <h2 className="mt-4 text-xl font-semibold text-gray-800">
               {userProfile.name}
             </h2>
+              {/* Divider */}
+                <hr className="my-4 border-gray-300" />
+
+{/* Social Media Links */}
+<div className="space-y-2">
+  {/* Facebook Link */}
+  <div className="flex items-center space-x-2">
+    <div className="w-8 h-8 bg-gray-400 rounded-full flex items-center justify-center">
+      <img src={facebookImage} alt="Facebook icon" className="w-8 h-8" />
+    </div>
+    {isEditing ? (
+      <input
+        type="text"
+        name="socialMediaFacebook"
+        value={editableProfile.socialMediaFacebook || ""}
+        onChange={handleChange}
+        className="text-sm text-gray-800 font-medium border border-gray-300 p-1 rounded w-full"
+        placeholder="Enter your Facebook link here"
+      />
+    ) : (
+      <a
+        href={userProfile.socialMediaFacebook || "#"}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-sm text-gray-600 hover:text-blue-500"
+      >
+        {userProfile.socialMediaFacebook || "Enter your Facebook link here"}
+      </a>
+    )}
+  </div>
+
+  {/* Instagram Link */}
+  <div className="flex items-center space-x-2">
+    <div className="w-8 h-8 bg-gray-400 rounded-full flex items-center justify-center">
+      <img src={instagramImage} alt="Instagram icon" className="w-8 h-8" />
+    </div>
+    {isEditing ? (
+      <input
+        type="text"
+        name="socialMediaInstagram"
+        value={editableProfile.socialMediaInstagram || ""}
+        onChange={handleChange}
+        className="text-sm text-gray-800 font-medium border border-gray-300 p-1 rounded w-full"
+        placeholder="Enter your Instagram link here"
+      />
+    ) : (
+      <a
+        href={userProfile.socialMediaInstagram || "#"}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-sm text-gray-600 hover:text-pink-500"
+      >
+        {userProfile.socialMediaInstagram || "Enter your Instagram link here"}
+      </a>
+    )}
+  </div>
+
+  {/* Twitter Link */}
+  <div className="flex items-center space-x-2">
+    <div className="w-8 h-8 bg-gray-400 rounded-full flex items-center justify-center">
+      <img src={twitterImage} alt="Twitter icon" className="w-8 h-8" />
+    </div>
+    {isEditing ? (
+      <input
+        type="text"
+        name="socialMediaTwitter"
+        value={editableProfile.socialMediaTwitter || ""}
+        onChange={handleChange}
+        className="text-sm text-gray-800 font-medium border border-gray-300 p-1 rounded w-full"
+        placeholder="Enter your Twitter link here"
+      />
+    ) : (
+      <a
+        href={userProfile.socialMediaTwitter || "#"}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-sm text-gray-600 hover:text-blue-400"
+      >
+        {userProfile.socialMediaTwitter || "Enter your Twitter link here"}
+      </a>
+    )}
+  </div>
+</div>
+
           </div>
 
           {/* Right Side: Contact Info */}

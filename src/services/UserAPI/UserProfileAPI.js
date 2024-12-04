@@ -21,7 +21,10 @@ export const updateUserProfile = async (userId, userData) => {
       name: userData.name,
       email: userData.email,
       phoneNumber: userData.phoneNumber,
-      role: userData.role
+      role: userData.role,
+      socialMediaFacebook: userData.socialMediaFacebook,
+      socialMediaInstagram: userData.socialMediaInstagram,
+      socialMediaTwitter: userData.socialMediaTwitter
     });
     return response.data;
   } catch (error) {
@@ -29,7 +32,6 @@ export const updateUserProfile = async (userId, userData) => {
     throw error;
   }
 };
-
 
 export const changePassword = async (passwordData) => {
   try {
