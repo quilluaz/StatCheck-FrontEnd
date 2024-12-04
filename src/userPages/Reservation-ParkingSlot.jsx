@@ -10,7 +10,7 @@ function ParkingLot() {
   const [selectedSpot, setSelectedSpot] = useState(null);
   const [reservationDate, setReservationDate] = useState(() => {
     const today = new Date();
-    return today.toISOString().split('T')[0]; // Default to today's date
+    return today.toISOString().split('T')[0];
   });
   const [startTime, setStartTime] = useState('');
   const [endTime, setEndTime] = useState('');
@@ -53,7 +53,7 @@ function ParkingLot() {
 
         setMessage(`Reserved spot ${selectedSpot} from ${startDateTime} to ${endDateTime}`);
         setSelectedSpot(null);
-        setReservationDate(new Date().toISOString().split('T')[0]); // Reset to today's date
+        setReservationDate(new Date().toISOString().split('T')[0]);
         setStartTime('');
         setEndTime('');
       } catch (err) {
@@ -65,22 +65,91 @@ function ParkingLot() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen" style={{ backgroundImage: `url('/images/wallpeps.png')`, backgroundSize: 'cover', backgroundRepeat: 'no-repeat', backgroundPosition: 'center' }}>
+    <div style={{
+      minHeight: '100vh',
+      backgroundImage: `url('/images/wallpeps.png')`,
+      backgroundSize: 'cover',
+      backgroundRepeat: 'no-repeat',
+      backgroundPosition: 'center',
+      backgroundAttachment: 'fixed',
+      display: 'flex',
+      flexDirection: 'column',
+    }}>
       <Navbar />
-      <main className="flex-grow container mx-auto px-4 py-8">
-        <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
-          <h2 className="text-4xl font-bold mb-6 text-left text-black">
+      <main style={{
+        flexGrow: 1,
+        padding: '2rem',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+      }}>
+        <div style={{
+          background: 'rgba(255, 255, 255, 0.8)',
+          borderRadius: '1rem',
+          padding: '2rem',
+          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+          backdropFilter: 'blur(10px)',
+          width: '100%',
+          maxWidth: '1200px',
+          marginBottom: '2rem',
+        }}>
+          <h2 style={{
+            fontSize: '2.5rem',
+            fontWeight: 'bold',
+            color: '#333',
+            textAlign: 'center',
+            marginBottom: '1rem',
+          }}>
             {selectedLot ? `Reservations for ${parkingLots.find(lot => lot.parkingLotID === selectedLot)?.parkingLotName}` : 'Parking Lot Reservations'}
           </h2>
         </div>
 
         {!selectedLot ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+            gap: '2rem',
+            width: '100%',
+            maxWidth: '1200px',
+          }}>
             {parkingLots.map((lot) => (
-              <div key={lot.parkingLotID} className="bg-white rounded-lg shadow-lg overflow-hidden cursor-pointer transition-transform hover:scale-105" onClick={() => setSelectedLot(lot.parkingLotID)}>
-                <div className="relative">
-                  <img src={`/images/${lot.parkingLotName.toLowerCase()}.jpg`} alt={lot.parkingLotName} className="w-full h-40 object-cover" />
-                  <div className="absolute bottom-4 left-4 text-white font-bold text-xl bg-black bg-opacity-50 p-2">
+              <div
+                key={lot.parkingLotID}
+                onClick={() => setSelectedLot(lot.parkingLotID)}
+                style={{
+                  background: 'white',
+                  borderRadius: '1rem',
+                  overflow: 'hidden',
+                  boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                  cursor: 'pointer',
+                  transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+                  ':hover': {
+                    transform: 'scale(1.05)',
+                    boxShadow: '0 10px 15px rgba(0, 0, 0, 0.2)',
+                  },
+                }}
+              >
+                <div style={{ position: 'relative' }}>
+                  <img
+                    src={`/images/${lot.parkingLotName.toLowerCase()}.jpg`}
+                    alt={lot.parkingLotName}
+                    style={{
+                      width: '100%',
+                      height: '200px',
+                      objectFit: 'cover',
+                    }}
+                  />
+                  <div style={{
+                    position: 'absolute',
+                    bottom: '1rem',
+                    left: '1rem',
+                    background: 'rgba(0, 0, 0, 0.7)',
+                    color: 'white',
+                    padding: '0.5rem 1rem',
+                    borderRadius: '0.5rem',
+                    fontSize: '1.2rem',
+                    fontWeight: 'bold',
+                  }}>
                     {lot.parkingLotName}
                   </div>
                 </div>
@@ -88,11 +157,34 @@ function ParkingLot() {
             ))}
           </div>
         ) : (
-          <div className="flex">
-            <div className="w-1/3 bg-gray-100 p-4 rounded-lg shadow-lg">
-              <h3 className="text-xl font-semibold mb-4">Create Reservation</h3>
-              <div className="mb-4">
-                <label htmlFor="reservation-date" className="block text-sm font-medium">
+          <div style={{
+            display: 'flex',
+            gap: '2rem',
+            width: '100%',
+            maxWidth: '1200px',
+          }}>
+            <div style={{
+              flex: '1',
+              background: 'rgba(255, 255, 255, 0.8)',
+              borderRadius: '1rem',
+              padding: '2rem',
+              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+              backdropFilter: 'blur(10px)',
+            }}>
+              <h3 style={{
+                fontSize: '1.5rem',
+                fontWeight: 'bold',
+                marginBottom: '1rem',
+                color: '#333',
+              }}>Create Reservation</h3>
+              <div style={{ marginBottom: '1rem' }}>
+                <label htmlFor="reservation-date" style={{
+                  display: 'block',
+                  marginBottom: '0.5rem',
+                  fontSize: '0.875rem',
+                  fontWeight: '500',
+                  color: '#4a5568',
+                }}>
                   Date
                 </label>
                 <input
@@ -100,12 +192,24 @@ function ParkingLot() {
                   id="reservation-date"
                   value={reservationDate}
                   onChange={(e) => setReservationDate(e.target.value)}
-                  min={new Date().toISOString().split('T')[0]} // Prevent selecting past dates
-                  className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md"
+                  min={new Date().toISOString().split('T')[0]}
+                  style={{
+                    width: '100%',
+                    padding: '0.5rem',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '0.375rem',
+                    fontSize: '1rem',
+                  }}
                 />
               </div>
-              <div className="mb-4">
-                <label htmlFor="start-time" className="block text-sm font-medium">
+              <div style={{ marginBottom: '1rem' }}>
+                <label htmlFor="start-time" style={{
+                  display: 'block',
+                  marginBottom: '0.5rem',
+                  fontSize: '0.875rem',
+                  fontWeight: '500',
+                  color: '#4a5568',
+                }}>
                   Start Time
                 </label>
                 <input
@@ -113,11 +217,23 @@ function ParkingLot() {
                   id="start-time"
                   value={startTime}
                   onChange={(e) => setStartTime(e.target.value)}
-                  className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md"
+                  style={{
+                    width: '100%',
+                    padding: '0.5rem',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '0.375rem',
+                    fontSize: '1rem',
+                  }}
                 />
               </div>
-              <div className="mb-4">
-                <label htmlFor="end-time" className="block text-sm font-medium">
+              <div style={{ marginBottom: '1rem' }}>
+                <label htmlFor="end-time" style={{
+                  display: 'block',
+                  marginBottom: '0.5rem',
+                  fontSize: '0.875rem',
+                  fontWeight: '500',
+                  color: '#4a5568',
+                }}>
                   End Time
                 </label>
                 <input
@@ -125,35 +241,82 @@ function ParkingLot() {
                   id="end-time"
                   value={endTime}
                   onChange={(e) => setEndTime(e.target.value)}
-                  className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md"
+                  style={{
+                    width: '100%',
+                    padding: '0.5rem',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '0.375rem',
+                    fontSize: '1rem',
+                  }}
                 />
               </div>
               <button
                 onClick={handleReserve}
                 disabled={!selectedSpot || !reservationDate || !startTime || !endTime}
-                className={`w-full py-2 rounded-md ${selectedSpot && reservationDate && startTime && endTime ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-gray-400 text-gray-700 cursor-not-allowed'}`}
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  borderRadius: '0.375rem',
+                  fontSize: '1rem',
+                  fontWeight: '500',
+                  color: 'white',
+                  background: selectedSpot && reservationDate && startTime && endTime ? '#4299e1' : '#a0aec0',
+                  cursor: selectedSpot && reservationDate && startTime && endTime ? 'pointer' : 'not-allowed',
+                  transition: 'background-color 0.3s ease',
+                }}
               >
                 Book Now
               </button>
               <button
                 onClick={() => setSelectedLot(null)}
-                className="w-full mt-4 bg-red-600 text-white py-2 rounded-md hover:bg-red-700"
+                style={{
+                  width: '100%',
+                  marginTop: '1rem',
+                  padding: '0.75rem',
+                  borderRadius: '0.375rem',
+                  fontSize: '1rem',
+                  fontWeight: '500',
+                  color: 'white',
+                  background: '#e53e3e',
+                  cursor: 'pointer',
+                  transition: 'background-color 0.3s ease',
+                }}
               >
                 Back to Parking Lots
               </button>
             </div>
-            <div className="w-2/3 ml-8">
-              <h3 className="text-2xl font-semibold mb-4">Available Spots</h3>
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div style={{ flex: '2' }}>
+              <h3 style={{
+                fontSize: '1.5rem',
+                fontWeight: 'bold',
+                marginBottom: '1rem',
+                color: '#333',
+              }}>Available Spots</h3>
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))',
+                gap: '1rem',
+              }}>
                 {availableSpaces.map((space) => (
                   <button
                     key={space.parkingSpaceId}
                     onClick={() => setSelectedSpot(space.parkingSpaceId)}
-                    className={`w-full p-4 border rounded-lg shadow-sm text-center hover:bg-blue-100 ${selectedSpot === space.parkingSpaceId ? 'bg-blue-500 text-white' : (space.status === 'RESERVED' ? 'bg-yellow-500' : 'bg-green-200')}`}
+                    style={{
+                      padding: '1rem',
+                      border: 'none',
+                      borderRadius: '0.5rem',
+                      textAlign: 'center',
+                      cursor: 'pointer',
+                      transition: 'all 0.3s ease',
+                      background: selectedSpot === space.parkingSpaceId ? '#4299e1' : (space.status === 'RESERVED' ? '#ecc94b' : '#9ae6b4'),
+                      color: selectedSpot === space.parkingSpaceId ? 'white' : '#2d3748',
+                      transform: selectedSpot === space.parkingSpaceId ? 'scale(1.05)' : 'scale(1)',
+                      boxShadow: selectedSpot === space.parkingSpaceId ? '0 4px 6px rgba(66, 153, 225, 0.5)' : '0 2px 4px rgba(0, 0, 0, 0.1)',
+                    }}
                   >
-                    <div>{space.parkingName}</div>
-                    <div className="text-sm">{space.status}</div>
-                    <div className="text-sm">{space.spaceType}</div>
+                    <div style={{ fontWeight: 'bold' }}>{space.parkingName}</div>
+                    <div style={{ fontSize: '0.75rem', marginTop: '0.25rem' }}>{space.status}</div>
+                    <div style={{ fontSize: '0.75rem' }}>{space.spaceType}</div>
                   </button>
                 ))}
               </div>
@@ -163,15 +326,51 @@ function ParkingLot() {
       </main>
 
       {message && (
-        <div className="bg-green-50 border-l-4 border-green-500 p-4 mb-4 text-green-700">
+        <div style={{
+          position: 'fixed',
+          bottom: '1rem',
+          right: '1rem',
+          background: '#c6f6d5',
+          borderLeft: '4px solid #48bb78',
+          padding: '1rem',
+          borderRadius: '0.5rem',
+          color: '#2f855a',
+          boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+          maxWidth: '300px',
+          animation: 'slideIn 0.5s ease-out',
+        }}>
           {message}
         </div>
       )}
       {error && (
-        <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-4 text-red-700">
+        <div style={{
+          position: 'fixed',
+          bottom: '1rem',
+          right: '1rem',
+          background: '#fed7d7',
+          borderLeft: '4px solid #f56565',
+          padding: '1rem',
+          borderRadius: '0.5rem',
+          color: '#c53030',
+          boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+          maxWidth: '300px',
+          animation: 'slideIn 0.5s ease-out',
+        }}>
           {error}
         </div>
       )}
+      <style jsx>{`
+        @keyframes slideIn {
+          from {
+            transform: translateX(100%);
+            opacity: 0;
+          }
+          to {
+            transform: translateX(0);
+            opacity: 1;
+          }
+        }
+      `}</style>
     </div>
   );
 }
