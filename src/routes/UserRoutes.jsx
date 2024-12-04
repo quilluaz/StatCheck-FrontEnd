@@ -4,6 +4,7 @@ import { useAuth } from "../contexts/AuthContext";
 import ProtectedRoute from "../components/ProtectedRoute";
 import Landing from "../userPages/Landing";
 import Home from "../userPages/Home";
+import Buildings from "../userPages/Buildings";
 import BuildingsRTL from "../userPages/Buildings-RTL";
 import BuildingsNGE from "../userPages/Buildings-NGE";
 import BuildingsGLE from "../userPages/Buildings-GLE";
@@ -51,6 +52,15 @@ const UserRoutes = () => {
         element={
           <ProtectedRoute>
             <BuildingsGLE />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/buildings"
+        element={
+          <ProtectedRoute>
+            <Buildings/>
           </ProtectedRoute>
         }
       />
