@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from '../components/UserNavbar';
-// import { fetchParkingLots, createReservation } from '../services/ParkingReservationAPI'
-
+import { ParkingLotAPI } from '../services/AdminAPI/ParkingLotAPI'; // Importing the API functions
+import { ParkingReservationAPI } from '../services/AdminAPI/ParkingReservationAPI';
 const API_URL = "/api";
 
 function ParkingLot() {
@@ -18,8 +18,8 @@ function ParkingLot() {
   useEffect(() => {
     const loadParkingLots = async () => {
       try {
-        const response = await fetchParkingLots();
-        setParkingLots(response.data);
+        const response = await ParkingLotAPI.getAllParkingLots(); // Fetch all parking lots
+        setParkingLots(response);
       } catch (err) {
         setError('Failed to load parking lots.');
       }
@@ -30,9 +30,9 @@ function ParkingLot() {
   // Update available spaces when a parking lot is selected
   useEffect(() => {
     if (selectedLot) {
-      const lot = parkingLots.find(lot => lot.lotId === selectedLot);
+      const lot = parkingLots.find(lot => lot.parkingLotID === selectedLot);
       if (lot) {
-        setAvailableSpaces(lot.availableSpaces); // Adjusted to match the structure of the API response
+        setAvailableSpaces(lot.parkingSpaces); // Setting the available spaces for the selected lot
       }
     }
   }, [selectedLot, parkingLots]);
@@ -45,9 +45,10 @@ function ParkingLot() {
         const startDateTime = new Date(`${today}T${startTime}:00`).toISOString(); // Full start datetime
         const endDateTime = new Date(`${today}T${endTime}:00`).toISOString(); // Full end datetime
 
-        // Send reservation request
-        await createReservation({
-          parkingLot: { lotId: selectedLot },
+        // Send reservation request via ParkingReservationAPI
+        await ParkingReservationAPI.createReservation({
+          parkingSpace: { parkingSpaceId: selectedSpot },
+          userEntity: { userID: 1 }, // You might want to dynamically get the user's ID
           reservationStartTime: startDateTime,
           reservationEndTime: endDateTime,
         });
@@ -71,7 +72,7 @@ function ParkingLot() {
         {/* Reservation Header Section */}
         <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
           <h2 className="text-4xl font-bold mb-6 text-left text-black">
-            {selectedLot ? `Reservations for ${parkingLots.find(lot => lot.lotId === selectedLot)?.lotNumber}` : 'Parking Lot Reservations'}
+            {selectedLot ? `Reservations for ${parkingLots.find(lot => lot.parkingLotID === selectedLot)?.parkingLotName}` : 'Parking Lot Reservations'}
           </h2>
         </div>
 
@@ -79,11 +80,11 @@ function ParkingLot() {
         {!selectedLot ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             {parkingLots.map((lot) => (
-              <div key={lot.lotId} className="bg-white rounded-lg shadow-lg overflow-hidden cursor-pointer transition-transform hover:scale-105" onClick={() => setSelectedLot(lot.lotId)}>
+              <div key={lot.parkingLotID} className="bg-white rounded-lg shadow-lg overflow-hidden cursor-pointer transition-transform hover:scale-105" onClick={() => setSelectedLot(lot.parkingLotID)}>
                 <div className="relative">
-                  <img src={`/images/${lot.lotNumber.toLowerCase()}.jpg`} alt={lot.lotNumber} className="w-full h-40 object-cover" />
+                  <img src={`/images/${lot.parkingLotName.toLowerCase()}.jpg`} alt={lot.parkingLotName} className="w-full h-40 object-cover" />
                   <div className="absolute bottom-4 left-4 text-white font-bold text-xl bg-black bg-opacity-50 p-2">
-                    {lot.lotNumber}
+                    {lot.parkingLotName}
                   </div>
                 </div>
               </div>
@@ -139,11 +140,13 @@ function ParkingLot() {
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
                 {availableSpaces.map((space) => (
                   <button
-                    key={space}
-                    onClick={() => setSelectedSpot(space)}
-                    className={`w-full p-4 bg-white border rounded-lg shadow-sm text-center hover:bg-blue-100 ${selectedSpot === space ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                    key={space.parkingSpaceId}
+                    onClick={() => setSelectedSpot(space.parkingSpaceId)}
+                    className={`w-full p-4 bg-white border rounded-lg shadow-sm text-center hover:bg-blue-100 ${selectedSpot === space.parkingSpaceId ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
                   >
-                    {space}
+                    <div>{space.parkingName}</div>
+                    <div className="text-sm">{space.status}</div>
+                    <div className="text-sm">{space.spaceType}</div>
                   </button>
                 ))}
               </div>

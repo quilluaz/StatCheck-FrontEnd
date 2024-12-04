@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { ParkingLotAPI } from "../services/AdminAPI/ParkingLotAPI";
 import { Pencil, Trash2, Plus, Eye, Save } from "lucide-react";
 import { Modal } from "react-responsive-modal";
+import { ParkingReservationAPI } from "../services/AdminAPI/ParkingReservationAPI";
 
 const ParkingLot = () => {
   const [parkingLots, setParkingLots] = useState([]);
@@ -263,8 +264,38 @@ const ParkingLot = () => {
     }
   };
 
+  const handleReserveSpace = async (spaceId) => {
+    try {
+      const today = new Date().toISOString().split("T")[0]; // Get today's date in 'YYYY-MM-DD' format
+      const startDateTime = new Date(`${today}T00:00:00`).toISOString(); // Full start datetime (midnight)
+      const endDateTime = new Date(`${today}T23:59:59`).toISOString(); // Full end datetime (end of the day)
+
+      // Send reservation request via ParkingReservationAPI
+      await ParkingReservationAPI.createReservation({
+        parkingSpace: { parkingSpaceId: spaceId },
+        userEntity: { userID: 1 }, // You might want to dynamically get the user's ID
+        reservationStartTime: startDateTime,
+        reservationEndTime: endDateTime,
+      });
+
+      // Update the status of the parking space to 'OCCUPIED'
+      setParkingLots((prevLots) =>
+        prevLots.map((lot) => ({
+          ...lot,
+          parkingSpaces: lot.parkingSpaces.map((space) =>
+            space.parkingSpaceId === spaceId ? { ...space, status: "OCCUPIED" } : space
+          ),
+        }))
+      );
+
+      setError(""); // Clear any previous errors
+    } catch (err) {
+      setError("Failed to reserve parking space.");
+      console.error("Error reserving parking space:", err);
+    }
+  };
+
   const renderParkingSpaceRow = (space) => {
-    const isEditing = editingId === space.parkingSpaceId;
     const statusColor = space.status === "AVAILABLE" 
       ? "bg-green-100 text-green-800" 
       : "bg-red-100 text-red-800";
@@ -274,58 +305,19 @@ const ParkingLot = () => {
         <td className="px-6 py-4 whitespace-nowrap">{space.parkingSpaceId}</td>
         <td className="px-6 py-4 whitespace-nowrap">{space.parkingName}</td>
         <td className="px-6 py-4 whitespace-nowrap">
-          {isEditing ? (
-            <select
-              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-              value={editedSpace.spaceType}
-              onChange={(e) => setEditedSpace({
-                ...editedSpace,
-                spaceType: e.target.value
-              })}
-            >
-              <option value="CAR">CAR</option>
-              <option value="MOTORCYCLE">MOTORCYCLE</option>
-            </select>
-          ) : (
-            space.spaceType
-          )}
-        </td>
-        <td className="px-6 py-4 whitespace-nowrap">
-          {isEditing ? (
-            <select
-              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-              value={editedSpace.status}
-              onChange={(e) => setEditedSpace({
-                ...editedSpace,
-                status: e.target.value
-              })}
-            >
-              <option value="AVAILABLE">AVAILABLE</option>
-              <option value="OCCUPIED">OCCUPIED</option>
-            </select>
-          ) : (
-            <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${statusColor}`}>
-              {space.status}
-            </span>
-          )}
+          <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${statusColor}`}>
+            {space.status}
+          </span>
         </td>
         <td className="px-6 py-4 whitespace-nowrap">
           <div className="flex items-center space-x-4">
-            {isEditing ? (
-              <button
-                onClick={() => handleSaveClick(space.parkingSpaceId)}
-                className="text-green-600 hover:text-green-800"
-              >
-                <Save className="h-5 w-5" />
-              </button>
-            ) : (
-              <button
-                onClick={() => handleEditClick(space)}
-                className="text-blue-600 hover:text-blue-800"
-              >
-                <Pencil className="h-5 w-5" />
-              </button>
-            )}
+            <button
+              onClick={() => handleReserveSpace(space.parkingSpaceId)}
+              className="text-blue-600 hover:text-blue-800"
+              disabled={space.status !== "AVAILABLE"}
+            >
+              Reserve
+            </button>
             <button
               onClick={() => handleDeleteSpace(space.parkingSpaceId)}
               className="text-red-600 hover:text-red-800"
