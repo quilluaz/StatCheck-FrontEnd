@@ -21,35 +21,35 @@ export function AuthProvider({ children }) {
   const [isLoading, setIsLoading] = useState(true);
 
   const checkAuthStatus = useCallback(async () => {
-    if (window.location.pathname === '/') {
+    if (window.location.pathname === "/") {
       setIsLoading(false);
       return;
     }
 
     try {
-      console.log('Checking auth status...');
+      console.log("Checking auth status...");
       const response = await fetch("/api/auth/verify-token", {
-        method: 'GET',
-        credentials: 'include',
+        method: "GET",
+        credentials: "include",
         headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
+          Accept: "application/json",
+          "Content-Type": "application/json",
         },
       });
-      
-      console.log('Auth status response:', response.status);
+
+      console.log("Auth status response:", response.status);
       const data = await response.json();
-      console.log('Auth status data:', data);
+      console.log("Auth status data:", data);
 
       if (response.ok && data.valid) {
-        console.log('Setting user:', data);
+        console.log("Setting user:", data);
         setUser({
+          userId: data.userId,
           email: data.email,
           role: data.role,
-          id: data.userId
         });
       } else {
-        console.log('Clearing user state');
+        console.log("Clearing user state");
         setUser(null);
       }
     } catch (error) {
@@ -66,7 +66,7 @@ export function AuthProvider({ children }) {
 
   const login = useCallback(async (credentials) => {
     try {
-      console.log('AuthContext: Attempting login...');
+      console.log("AuthContext: Attempting login...");
       const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: {
@@ -76,17 +76,18 @@ export function AuthProvider({ children }) {
         credentials: "include",
       });
 
-      console.log('AuthContext: Login response status:', response.status);
+      console.log("AuthContext: Login response status:", response.status);
       const data = await response.json();
-      console.log('AuthContext: Login response data:', data);
+      console.log("AuthContext: Login response data:", data);
 
       if (!response.ok) {
         throw new Error(data.message || data.error || "Login failed");
       }
 
       setUser({
+        userId: data.id,
         email: data.email,
-        role: data.role
+        role: data.role,
       });
 
       return data;

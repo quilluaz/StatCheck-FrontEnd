@@ -73,14 +73,14 @@ const BuildingDetails = () => {
     fetchBuildingAndRooms();
   }, [buildingName]);
 
-  const handleFloorChange = (event) => {
-    setSelectedFloor(event.target.value);
+  const handleFloorChange = (floor) => {
+    setSelectedFloor(floor);
+    setIsFloorDropdownOpen(false);
   };
 
-  const filteredRooms =
-    selectedFloor === "All"
-      ? rooms
-      : rooms.filter((room) => room.floorNumber === parseInt(selectedFloor));
+  const filteredRooms = selectedFloor === 'All' 
+    ? rooms 
+    : rooms.filter((room) => room.floorNumber === selectedFloor);
 
   const generateRoomName = (floorNumber, index) => {
     return `${buildingName.toUpperCase()}${floorNumber}0${index + 1}`;
@@ -165,31 +165,25 @@ const BuildingDetails = () => {
                 <button
                   onClick={() => setIsFloorDropdownOpen(!isFloorDropdownOpen)}
                   className="flex items-center px-4 py-2 text-maroon font-bold border border-maroon rounded-md
-                           hover:text-white hover:border-gold transition-colors">
+                           hover:text-gold hover:border-gold transition-colors">
                   Select Floor: {selectedFloor === 'All' ? 'All Floors' : `Floor ${selectedFloor}`}
                   <ChevronDown className="ml-2 h-4 w-4" />
                 </button>
                 
                 {isFloorDropdownOpen && (
                   <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 overflow-hidden z-10">
-                    <div className="py-1">
+                    <div className="py-1 max-h-[40vh] overflow-y-auto">
                       <button
                         onClick={() => handleFloorChange('All')}
-                        className="block w-full px-4 py-2 text-sm text-maroon relative overflow-hidden group text-left">
-                        <span className="relative z-10 group-hover:text-white transition-colors duration-300">
-                          All Floors
-                        </span>
-                        <div className="absolute inset-0 bg-maroon transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
+                        className="block w-full px-4 py-2 text-sm text-maroon hover:bg-maroon hover:text-white transition-colors duration-300 text-left">
+                        All Floors
                       </button>
-                      {[...new Set(rooms.map((room) => room.floorNumber))].map((floor) => (
+                      {[...Array(buildingDetails?.floors || 0)].map((_, index) => (
                         <button
-                          key={`floor-${floor}`}
-                          onClick={() => handleFloorChange(floor)}
-                          className="block w-full px-4 py-2 text-sm text-maroon relative overflow-hidden group text-left">
-                          <span className="relative z-10 group-hover:text-white transition-colors duration-300">
-                            Floor {floor}
-                          </span>
-                          <div className="absolute inset-0 bg-maroon transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
+                          key={`floor-${index + 1}`}
+                          onClick={() => handleFloorChange(index + 1)}
+                          className="block w-full px-4 py-2 text-sm text-maroon hover:bg-maroon hover:text-white transition-colors duration-300 text-left">
+                          Floor {index + 1}
                         </button>
                       ))}
                     </div>

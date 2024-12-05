@@ -125,18 +125,18 @@ const RoomsDetails = ({ room, onClose, onCapacityUpdate }) => {
       {/* Schedule Modal */}
       {isScheduleModalOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60]"
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[60]"
           onClick={(e) => {
             if (e.target === e.currentTarget) {
               setIsScheduleModalOpen(false);
             }
           }}>
-          <div className="bg-white rounded-lg w-[90vw] max-h-[80vh] p-6 overflow-auto">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold">Weekly Schedule</h2>
+          <div className="bg-white/95 backdrop-blur-sm rounded-lg w-[90vw] max-h-[80vh] p-6 overflow-auto">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-3xl font-bold text-maroon">Weekly Schedule</h2>
               <button
                 onClick={() => setIsScheduleModalOpen(false)}
-                className="text-gray-500 hover:text-gray-700">
+                className="text-maroon hover:text-gold transition-colors">
                 <svg
                   className="w-6 h-6"
                   fill="none"
@@ -154,20 +154,20 @@ const RoomsDetails = ({ room, onClose, onCapacityUpdate }) => {
 
             <div className="grid grid-cols-7 gap-4">
               {Object.entries(schedulesByDay).map(([day, schedules]) => (
-                <div key={day} className="border rounded-lg p-4">
-                  <h3 className="font-bold text-center mb-3">{day}</h3>
+                <div key={day} className="border border-maroon/20 rounded-lg p-4">
+                  <h3 className="font-bold text-center mb-3 text-maroon">{day}</h3>
                   <div className="space-y-2">
                     {schedules.length > 0 ? (
                       schedules.map((schedule, index) => (
                         <div
                           key={`${day}-${index}`}
-                          className="bg-gray-50 p-2 rounded text-sm">
-                          <p className="font-semibold">
+                          className="bg-white/80 p-2 rounded text-sm border border-maroon/10 hover:border-gold/30 transition-colors">
+                          <p className="font-semibold text-maroon">
                             {formatTime(schedule.startTime)} -{" "}
                             {formatTime(schedule.endTime)}
                           </p>
-                          <p>{schedule.subjectEntity?.subjectName}</p>
-                          <p className="text-gray-500">
+                          <p className="text-maroon/90">{schedule.subjectEntity?.subjectName}</p>
+                          <p className="text-gold">
                             Section: {schedule.subjectEntity?.section}
                           </p>
                         </div>
