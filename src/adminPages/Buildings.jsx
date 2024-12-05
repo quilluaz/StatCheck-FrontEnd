@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { BuildingAPI } from "../services/AdminAPI/BuildingAPI";
-import { Pencil, Trash2, Plus } from "lucide-react";
+import { Pencil, Trash2, Plus, X } from "lucide-react";
 
 const Building = () => {
   const [buildings, setBuildings] = useState([]);
@@ -12,6 +12,8 @@ const Building = () => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [isRoomsModalOpen, setIsRoomsModalOpen] = useState(false);
+  const [selectedBuildingRooms, setSelectedBuildingRooms] = useState([]);
 
   const fetchBuildings = async () => {
     try {
@@ -112,6 +114,12 @@ const Building = () => {
     setFormData({ buildingName: "", floors: "" });
   };
 
+  const handleShowRooms = (rooms) => {
+    console.log('Detailed rooms data:', JSON.stringify(rooms, null, 2));
+    setSelectedBuildingRooms(rooms);
+    setIsRoomsModalOpen(true);
+  };
+
   if (error) {
     return (
       <div className="container mx-auto p-6">
@@ -146,13 +154,16 @@ const Building = () => {
                     Floors
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Rooms
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {buildings.map((building) => (
-                  <tr key={building.buildingID}>
+                {buildings.map((building, index) => (
+                  <tr key={`building-${building.buildingID || index}`}>
                     <td className="px-6 py-4 whitespace-nowrap">
                       {building.buildingID}
                     </td>
@@ -161,6 +172,18 @@ const Building = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       {building.floors}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {building.rooms && building.rooms.length > 0 ? (
+                        <button
+                          onClick={() => handleShowRooms(building.rooms)}
+                          className="px-3 py-1 text-sm text-white bg-blue-500 rounded hover:bg-blue-600 transition-colors"
+                        >
+                          Show Rooms ({building.rooms.length})
+                        </button>
+                      ) : (
+                        "No rooms"
+                      )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex gap-2">
@@ -236,6 +259,57 @@ const Building = () => {
             </div>
           </div>
         )}
+
+        {isRoomsModalOpen && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+            <div className="bg-white p-6 rounded-lg w-full max-w-2xl">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-bold">Building Rooms</h2>
+                <button
+                  onClick={() => setIsRoomsModalOpen(false)}
+                  className="text-gray-500 hover:text-gray-700">
+                  <X size={20} />
+                </button>
+              </div>
+              <div className="max-h-96 overflow-y-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Room ID</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Floor</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Capacity</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {selectedBuildingRooms.map((room, index) => (
+                      <tr key={`room-${room.roomId || room.roomID || index}`}>
+                        <td className="px-6 py-4 whitespace-nowrap">{room.roomId || room.roomID}</td>
+                        <td className="px-6 py-4 whitespace-nowrap">{room.roomType}</td>
+                        <td className="px-6 py-4 whitespace-nowrap">{room.floorNumber}</td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {room.currentCapacity} / {room.capacity}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`px-2 py-1 rounded-full text-xs ${
+                            room.availabilityStatus === 'AVAILABLE' 
+                              ? 'bg-green-100 text-green-800'
+                              : room.availabilityStatus === 'OCCUPIED'
+                              ? 'bg-red-100 text-red-800'
+                              : 'bg-yellow-100 text-yellow-800'
+                          }`}>
+                            {room.availabilityStatus}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
@@ -275,13 +349,16 @@ const Building = () => {
                   Floors
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Rooms
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {buildings.map((building) => (
-                <tr key={building.buildingID}>
+              {buildings.map((building, index) => (
+                <tr key={`building-${building.buildingID || index}`}>
                   <td className="px-6 py-4 whitespace-nowrap">
                     {building.buildingID}
                   </td>
@@ -290,6 +367,18 @@ const Building = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     {building.floors}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {building.rooms && building.rooms.length > 0 ? (
+                      <button
+                        onClick={() => handleShowRooms(building.rooms)}
+                        className="px-3 py-1 text-sm text-white bg-blue-500 rounded hover:bg-blue-600 transition-colors"
+                      >
+                        Show Rooms ({building.rooms.length})
+                      </button>
+                    ) : (
+                      "No rooms"
+                    )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex gap-2">
@@ -362,6 +451,57 @@ const Building = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {isRoomsModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white p-6 rounded-lg w-full max-w-2xl">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold">Building Rooms</h2>
+              <button
+                onClick={() => setIsRoomsModalOpen(false)}
+                className="text-gray-500 hover:text-gray-700">
+                <X size={20} />
+              </button>
+            </div>
+            <div className="max-h-96 overflow-y-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Room ID</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Floor</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Capacity</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {selectedBuildingRooms.map((room, index) => (
+                    <tr key={`room-${room.roomId || room.roomID || index}`}>
+                      <td className="px-6 py-4 whitespace-nowrap">{room.roomId || room.roomID}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">{room.roomType}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">{room.floorNumber}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {room.currentCapacity} / {room.capacity}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`px-2 py-1 rounded-full text-xs ${
+                          room.availabilityStatus === 'AVAILABLE' 
+                            ? 'bg-green-100 text-green-800'
+                            : room.availabilityStatus === 'OCCUPIED'
+                            ? 'bg-red-100 text-red-800'
+                            : 'bg-yellow-100 text-yellow-800'
+                        }`}>
+                          {room.availabilityStatus}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       )}

@@ -5,11 +5,9 @@ import ProtectedRoute from "../components/ProtectedRoute";
 import Landing from "../userPages/Landing";
 import Home from "../userPages/Home";
 import Buildings from "../userPages/Buildings";
-import BuildingsRTL from "../userPages/Buildings-RTL";
-import BuildingsNGE from "../userPages/Buildings-NGE";
-import BuildingsGLE from "../userPages/Buildings-GLE";
-import ReservationLibraryRoom from "../userPages/Reservation-LibraryRoom";
-import ReservationParkingSlot from "../userPages/Reservation-ParkingSlot";
+import BuildingDetails from "../userPages/BuildingDetails";
+import ReservationLibraryRoom from "../userPages/LibraryRoomReservation";
+import ReservationParkingSlot from "../userPages/ParkingSlotReservation";
 import UserProfile from "../userPages/UserProfile";
 import About from "../userPages/About";
 
@@ -32,35 +30,18 @@ const UserRoutes = () => {
         }
       />
       <Route
-        path="/buildings/rtl"
+        path="/building/:buildingName"
         element={
           <ProtectedRoute>
-            <BuildingsRTL />
+            <BuildingDetails />
           </ProtectedRoute>
         }
       />
-      <Route
-        path="/buildings/nge"
-        element={
-          <ProtectedRoute>
-            <BuildingsNGE />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/buildings/gle"
-        element={
-          <ProtectedRoute>
-            <BuildingsGLE />
-          </ProtectedRoute>
-        }
-      />
-
       <Route
         path="/buildings"
         element={
           <ProtectedRoute>
-            <Buildings/>
+            <Buildings />
           </ProtectedRoute>
         }
       />

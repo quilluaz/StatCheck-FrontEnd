@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
 import Navbar from "../components/UserNavbar";
+import { useAuth } from "../contexts/AuthContext";
 import { getAllLibraries } from "../services/AdminAPI/LibraryAPI";
 import { LibraryRoomAPI } from "../services/AdminAPI/LibraryRoomAPI";
 import { LibraryReservationAPI } from "../services/AdminAPI/LibraryReservationAPI";
 
 function LibraryRoom() {
+  const { user } = useAuth();
   const [libraries, setLibraries] = useState([]);
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -73,12 +75,17 @@ function LibraryRoom() {
     e.preventDefault();
     setLoading(true);
     try {
+      if (!user || !user.id) {
+        setError('User not authenticated');
+        return;
+      }
+
       const payload = {
         startTime: reservationFormData.startTime,
         endTime: reservationFormData.endTime,
         status: reservationFormData.reservationStatus,
         userEntity: {
-          userID: 1, // Hardcoded userID
+          userID: user.id,
         },
         libraryRoomEntity: {
           libraryRoomID: parseInt(reservationFormData.libraryRoomID),

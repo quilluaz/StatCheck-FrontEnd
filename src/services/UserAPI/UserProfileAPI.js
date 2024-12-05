@@ -1,16 +1,20 @@
 import axios from "axios";
+import { toast } from 'react-toastify';
 
 const api = axios.create({
-  baseURL: '/api/auth',
+  baseURL: "/api/auth",
   withCredentials: true,
 });
 
 export const fetchCurrentUserProfile = async () => {
   try {
-    const response = await api.get('/user-profiles/current');
+    const response = await api.get("/user-profiles/current");
     return response.data;
   } catch (error) {
-    console.error("Error fetching user profile:", error.response?.data || error.message);
+    console.error(
+      "Error fetching user profile:",
+      error.response?.data || error.message
+    );
     throw error;
   }
 };
@@ -24,27 +28,80 @@ export const updateUserProfile = async (userId, userData) => {
       role: userData.role,
       socialMediaFacebook: userData.socialMediaFacebook,
       socialMediaInstagram: userData.socialMediaInstagram,
-      socialMediaTwitter: userData.socialMediaTwitter
+      socialMediaTwitter: userData.socialMediaTwitter,
     });
+    
+    if (response.data.requireRelogin) {
+      toast.info('Email updated successfully. Please login again with your new email.', {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        newestOnTop: false,
+        closeOnClick: true,
+        rtl: false,
+        pauseOnFocusLoss: true,
+        draggable: true,
+        pauseOnHover: true,
+        theme: "light"
+      });
+      
+      localStorage.removeItem('user');
+      
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 2000);
+    } else {
+      toast.success('Profile updated successfully!', {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        newestOnTop: false,
+        closeOnClick: true,
+        rtl: false,
+        pauseOnFocusLoss: true,
+        draggable: true,
+        pauseOnHover: true,
+        theme: "light"
+      });
+    }
+    
     return response.data;
   } catch (error) {
-    console.error("Error updating user profile:", error.response?.data || error.message);
+    toast.error(error.response?.data?.error || 'Failed to update profile', {
+      position: "top-right",
+      autoClose: 3000,
+      hideProgressBar: false,
+      newestOnTop: false,
+      closeOnClick: true,
+      rtl: false,
+      pauseOnFocusLoss: true,
+      draggable: true,
+      pauseOnHover: true,
+      theme: "light"
+    });
     throw error;
   }
 };
 
 export const changePassword = async (passwordData) => {
   try {
-    const response = await axios.post('/api/auth/change-password', {
-      oldPassword: passwordData.oldPassword,
-      newPassword: passwordData.newPassword,
-      confirmNewPassword: passwordData.newPassword
-    }, {
-      withCredentials: true
-    });
+    const response = await axios.post(
+      "/api/auth/change-password",
+      {
+        oldPassword: passwordData.oldPassword,
+        newPassword: passwordData.newPassword,
+        confirmNewPassword: passwordData.newPassword,
+      },
+      {
+        withCredentials: true,
+      }
+    );
     return response.data;
   } catch (error) {
-    console.error("Error changing password:", error.response?.data || error.message);
+    console.error(
+      "Error changing password:",
+      error.response?.data || error.message
+    );
     throw error;
   }
 };

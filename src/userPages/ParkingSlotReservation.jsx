@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Navbar from '../components/UserNavbar';
 import { ParkingLotAPI } from '../services/AdminAPI/ParkingLotAPI';
 import { ParkingReservationAPI } from '../services/AdminAPI/ParkingReservationAPI';
+import { useAuth } from '../contexts/AuthContext';
 
 function ParkingLot() {
   const [parkingLots, setParkingLots] = useState([]);
@@ -16,6 +17,7 @@ function ParkingLot() {
   const [endTime, setEndTime] = useState('');
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const { user } = useAuth();
 
   useEffect(() => {
     const loadParkingLots = async () => {
@@ -39,6 +41,11 @@ function ParkingLot() {
   }, [selectedLot, parkingLots]);
 
   const handleReserve = async () => {
+    if (!user) {
+      setError('You must be logged in to make a reservation.');
+      return;
+    }
+
     if (selectedSpot && reservationDate && startTime && endTime) {
       try {
         const startDateTime = new Date(`${reservationDate}T${startTime}:00`).toISOString();
@@ -46,7 +53,7 @@ function ParkingLot() {
 
         await ParkingReservationAPI.createReservation({
           parkingSpace: { parkingSpaceId: selectedSpot },
-          userEntity: { userID: 1 },
+          userEntity: { userID: user.id },
           reservationStartTime: startDateTime,
           reservationEndTime: endDateTime,
         });
