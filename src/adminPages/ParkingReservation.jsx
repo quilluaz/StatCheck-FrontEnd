@@ -265,10 +265,6 @@ const ParkingReservation = () => {
         return;
       }
 
-      // Log the selected space details for debugging
-      console.log("Selected Space:", selectedSpace);
-      console.log("Selected User:", selectedUser);
-
       const reservationData = {
         parkingSpace: selectedSpace,
         userEntity: selectedUser,
@@ -317,7 +313,7 @@ const ParkingReservation = () => {
       setEditingReservation(null);
     } catch (error) {
       console.error("Error saving reservation:", error);
-      setError(error.response?.data?.message || "Failed to save reservation");
+      setError(error.message || "Failed to save reservation");
     }
   };
 
