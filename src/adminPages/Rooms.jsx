@@ -20,6 +20,8 @@ const Rooms = () => {
     schedules: [],
   });
   const [isEditing, setIsEditing] = useState(false);
+  const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
+  const [selectedRoomSchedules, setSelectedRoomSchedules] = useState([]);
 
   useEffect(() => {
     fetchRooms();
@@ -142,13 +144,12 @@ const Rooms = () => {
       validateForm();
 
       const roomData = {
+        roomId: currentRoom.roomID,
         roomType: currentRoom.roomType,
         capacity: parseInt(currentRoom.capacity),
         currentCapacity: currentRoom.currentCapacity || 0,
         availabilityStatus: currentRoom.availabilityStatus,
-        building: {
-          buildingID: currentRoom.building.buildingID,
-        },
+        building: currentRoom.building,
         floorNumber: parseInt(currentRoom.floorNumber),
         schedules: currentRoom.schedules || [],
       };
@@ -177,11 +178,7 @@ const Rooms = () => {
       capacity: room.capacity,
       currentCapacity: room.currentCapacity,
       availabilityStatus: room.availabilityStatus,
-      building: {
-        buildingID: room.building.buildingID,
-        buildingName: room.building.buildingName,
-        floors: room.building.floors,
-      },
+      building: room.building,
       floorNumber: room.floorNumber,
       schedules: room.schedules || [],
     });
@@ -216,6 +213,11 @@ const Rooms = () => {
       floorNumber: "",
       schedules: [],
     });
+  };
+
+  const handleShowSchedules = (schedules) => {
+    setSelectedRoomSchedules(schedules);
+    setIsScheduleModalOpen(true);
   };
 
   return (
@@ -290,11 +292,11 @@ const Rooms = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     {room.schedules && room.schedules.length > 0 ? (
-                      <ul>
-                        {room.schedules.map((schedule) => (
-                          <li key={schedule.id}>{schedule.details}</li>
-                        ))}
-                      </ul>
+                      <button
+                        onClick={() => handleShowSchedules(room.schedules)}
+                        className="px-3 py-1 text-sm text-white bg-blue-500 rounded hover:bg-blue-600 transition-colors">
+                        Show Schedule
+                      </button>
                     ) : (
                       "No schedules"
                     )}
@@ -447,6 +449,62 @@ const Rooms = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {isScheduleModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white p-6 rounded-lg w-full max-w-lg">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold">Room Schedules</h2>
+              <button
+                onClick={() => setIsScheduleModalOpen(false)}
+                className="text-gray-500 hover:text-gray-700">
+                <X size={20} />
+              </button>
+            </div>
+            <div className="max-h-96 overflow-y-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                      Day
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                      Time
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                      Subject
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {selectedRoomSchedules.map((schedule, index) => (
+                    <tr key={index}>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {schedule.dayOfWeek}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {new Date(schedule.startTime).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                        {" - "}
+                        {new Date(schedule.endTime).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {schedule.subjectEntity?.subjectName} (
+                        {schedule.subjectEntity?.section})
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       )}

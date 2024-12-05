@@ -45,7 +45,8 @@ export function AuthProvider({ children }) {
         console.log('Setting user:', data);
         setUser({
           email: data.email,
-          role: data.role
+          role: data.role,
+          id: data.userId
         });
       } else {
         console.log('Clearing user state');
