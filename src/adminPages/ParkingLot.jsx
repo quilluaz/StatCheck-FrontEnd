@@ -3,6 +3,7 @@ import { ParkingLotAPI } from "../services/AdminAPI/ParkingLotAPI";
 import { Pencil, Trash2, Plus, Eye, Save } from "lucide-react";
 import { Modal } from "react-responsive-modal";
 import { ParkingReservationAPI } from "../services/AdminAPI/ParkingReservationAPI";
+import { toast } from "react-toastify";
 
 const ParkingLot = () => {
   const [parkingLots, setParkingLots] = useState([]);
@@ -33,8 +34,14 @@ const ParkingLot = () => {
       setParkingLots(data);
       setError("");
     } catch (err) {
-      setError("Failed to load parking lots.");
-      console.error("Error fetching parking lots:", err);
+      console.error('Error in fetchData:', err);
+      if (err.response?.status === 401) {
+        toast.error("Unauthorized access. Please ensure you are logged in as an admin.");
+      } else if (err.response?.status === 403) {
+        toast.error("Forbidden access. You don't have permission to view parking lots.");
+      } else {
+        toast.error("Failed to fetch parking lots. Please try again later.");
+      }
     } finally {
       setLoading(false);
     }
@@ -64,7 +71,7 @@ const ParkingLot = () => {
   const handleCreate = async () => {
     try {
       if (!newLot.parkingLotName || newLot.spaces < 1) {
-        setError("Please provide a valid lot name and number of spaces.");
+        toast.error("Please provide a valid lot name and number of spaces.");
         return;
       }
 
@@ -77,7 +84,7 @@ const ParkingLot = () => {
       handleCloseModal();
       setError("");
     } catch (err) {
-      setError("Failed to create parking lot.");
+      toast.error("Failed to create parking lot.");
       console.error("Error creating parking lot:", err);
     } finally {
       setLoading(false);
@@ -121,11 +128,10 @@ const ParkingLot = () => {
       try {
         setLoading(true);
         await ParkingLotAPI.deleteParkingLot(id);
-        setParkingLots(parkingLots.filter((lot) => lot.parkingLotID !== id));
-        setError("");
+        toast.success("Parking lot deleted successfully");
+        await fetchParkingLots();
       } catch (err) {
-        setError("Failed to delete parking lot.");
-        console.error("Error deleting parking lot:", err);
+        toast.error("Failed to delete parking lot");
       } finally {
         setLoading(false);
       }
@@ -214,21 +220,10 @@ const ParkingLot = () => {
       try {
         setLoading(true);
         await ParkingLotAPI.deleteParkingSpace(spaceId);
-        const updatedLot = await ParkingLotAPI.getParkingLotById(
-          selectedLotSpaces.parkingLotID
-        );
-        setSelectedLotSpaces(updatedLot);
-        setParkingLots(
-          parkingLots.map((lot) =>
-            lot.parkingLotID === selectedLotSpaces.parkingLotID
-              ? updatedLot
-              : lot
-          )
-        );
-        setError("");
-      } catch (err) {
-        setError("Failed to delete parking space.");
-        console.error("Error deleting parking space:", err);
+        toast.success("Parking space deleted successfully");
+        loadParkingLots();
+      } catch (error) {
+        toast.error("Failed to delete parking space");
       } finally {
         setLoading(false);
       }

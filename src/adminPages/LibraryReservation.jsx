@@ -3,6 +3,7 @@ import { LibraryReservationAPI } from "../services/AdminAPI/LibraryReservationAP
 import { LibraryRoomAPI } from "../services/AdminAPI/LibraryRoomAPI";
 import { UserAPI } from "../services/AdminAPI/UserAPI";
 import { Pencil, Trash2, Plus } from "lucide-react";
+import { toast } from "react-toastify";
 
 const LibraryReservation = () => {
   const [reservations, setReservations] = useState([]);
@@ -31,11 +32,13 @@ const LibraryReservation = () => {
     try {
       const data = await LibraryReservationAPI.getAllReservations();
       setReservations(data);
-      setError("");
     } catch (err) {
-      setError("Failed to load reservations: " + (err.response?.data || err.message));
+      toast.error(
+        "Failed to load reservations: " + (err.response?.data || err.message)
+      );
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const loadUsers = async () => {
@@ -44,6 +47,7 @@ const LibraryReservation = () => {
       setUsers(data);
     } catch (err) {
       console.error("Failed to load users:", err);
+      toast.error("Failed to load users");
     }
   };
 
@@ -53,6 +57,7 @@ const LibraryReservation = () => {
       setLibraryRooms(data);
     } catch (err) {
       console.error("Failed to load library rooms:", err);
+      toast.error("Failed to load library rooms");
     }
   };
 
@@ -73,15 +78,18 @@ const LibraryReservation = () => {
         endTime: formData.endTime,
         status: formData.reservationStatus,
         userEntity: {
-          userID: parseInt(formData.userID)
+          userID: parseInt(formData.userID),
         },
         libraryRoomEntity: {
-          libraryRoomID: parseInt(formData.libraryRoomID)
-        }
+          libraryRoomID: parseInt(formData.libraryRoomID),
+        },
       };
 
       if (editingReservation) {
-        await LibraryReservationAPI.updateReservation(editingReservation.libraryRoomReservationID, payload);
+        await LibraryReservationAPI.updateReservation(
+          editingReservation.libraryRoomReservationID,
+          payload
+        );
       } else {
         await LibraryReservationAPI.createReservation(payload);
       }
@@ -100,7 +108,9 @@ const LibraryReservation = () => {
         await LibraryReservationAPI.deleteReservation(id);
         await loadReservations();
       } catch (err) {
-        setError("Failed to delete reservation: " + (err.response?.data || err.message));
+        setError(
+          "Failed to delete reservation: " + (err.response?.data || err.message)
+        );
       } finally {
         setLoading(false);
       }
@@ -110,7 +120,8 @@ const LibraryReservation = () => {
   const handleEditClick = (reservation) => {
     setFormData({
       userID: reservation.userEntity?.userID?.toString() || "",
-      libraryRoomID: reservation.libraryRoomEntity?.libraryRoomID?.toString() || "",
+      libraryRoomID:
+        reservation.libraryRoomEntity?.libraryRoomID?.toString() || "",
       startTime: reservation.startTime || "",
       endTime: reservation.endTime || "",
       reservationStatus: reservation.status || "",
@@ -132,28 +143,29 @@ const LibraryReservation = () => {
   };
 
   const formatDateTime = (dateTimeString) => {
-    if (!dateTimeString) return 'N/A';
-    
+    if (!dateTimeString) return "N/A";
+
     const date = new Date(dateTimeString);
-    
+
     // Format the date part (Month DD, YYYY)
-    const datePart = date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
+    const datePart = date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
     });
 
     // Format the day and time part (Day - HH:mm)
-    const dayOfWeek = date.toLocaleDateString('en-US', { weekday: 'long' });
-    const time = date.toLocaleTimeString('en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false
+    const dayOfWeek = date.toLocaleDateString("en-US", { weekday: "long" });
+    const time = date.toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
     });
 
     return (
       <>
-        {datePart}<br />
+        {datePart}
+        <br />
         {dayOfWeek} - {time}
       </>
     );
@@ -214,10 +226,16 @@ const LibraryReservation = () => {
                     {reservation.libraryRoomReservationID}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    {users.find(u => u.userID === reservation.userEntity?.userID)?.email || 'Unknown'}
+                    {users.find(
+                      (u) => u.userID === reservation.userEntity?.userID
+                    )?.email || "Unknown"}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    {libraryRooms.find(r => r.libraryRoomID === reservation.libraryRoomEntity?.libraryRoomID)?.roomName || 'Unknown'}
+                    {libraryRooms.find(
+                      (r) =>
+                        r.libraryRoomID ===
+                        reservation.libraryRoomEntity?.libraryRoomID
+                    )?.roomName || "Unknown"}
                   </td>
                   <td className="px-6 py-4 whitespace-pre-line">
                     {formatDateTime(reservation.startTime)}
@@ -247,7 +265,9 @@ const LibraryReservation = () => {
                         <Pencil size={20} />
                       </button>
                       <button
-                        onClick={() => handleDelete(reservation.libraryRoomReservationID)}
+                        onClick={() =>
+                          handleDelete(reservation.libraryRoomReservationID)
+                        }
                         className="text-red-600 hover:text-red-800">
                         <Trash2 size={20} />
                       </button>
@@ -268,14 +288,15 @@ const LibraryReservation = () => {
             </h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700">User</label>
+                <label className="block text-sm font-medium text-gray-700">
+                  User
+                </label>
                 <select
                   name="userID"
                   value={formData.userID}
                   onChange={handleInputChange}
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2"
-                  required
-                >
+                  required>
                   <option value="">Select User</option>
                   {users.map((user) => (
                     <option key={user.userID} value={user.userID}>
@@ -286,14 +307,15 @@ const LibraryReservation = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">Library Room</label>
+                <label className="block text-sm font-medium text-gray-700">
+                  Library Room
+                </label>
                 <select
                   name="libraryRoomID"
                   value={formData.libraryRoomID}
                   onChange={handleInputChange}
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2"
-                  required
-                >
+                  required>
                   <option value="">Select Library Room</option>
                   {libraryRooms.map((room) => (
                     <option key={room.libraryRoomID} value={room.libraryRoomID}>
@@ -304,7 +326,9 @@ const LibraryReservation = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">Start Time</label>
+                <label className="block text-sm font-medium text-gray-700">
+                  Start Time
+                </label>
                 <input
                   type="datetime-local"
                   name="startTime"
@@ -316,7 +340,9 @@ const LibraryReservation = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">End Time</label>
+                <label className="block text-sm font-medium text-gray-700">
+                  End Time
+                </label>
                 <input
                   type="datetime-local"
                   name="endTime"
@@ -328,7 +354,9 @@ const LibraryReservation = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">Status</label>
+                <label className="block text-sm font-medium text-gray-700">
+                  Status
+                </label>
                 <select
                   name="reservationStatus"
                   value={formData.reservationStatus}

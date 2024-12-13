@@ -3,6 +3,7 @@ import { AnalyticsAPI } from "../services/AdminAPI/AnalyticsAPI";
 import { RoomAPI } from "../services/AdminAPI/RoomAPI";
 import { useAuth } from "../contexts/AuthContext";
 import { Pencil, Trash2, Plus } from "lucide-react";
+import { toast } from "react-toastify";
 
 const Analytics = () => {
   const [analytics, setAnalytics] = useState([]);
@@ -30,7 +31,7 @@ const Analytics = () => {
       const data = await AnalyticsAPI.getAllAnalytics();
       setAnalytics(data);
     } catch (err) {
-      setError("Failed to load analytics");
+      toast.error("Failed to load analytics");
       console.error(err);
     } finally {
       setLoading(false);
@@ -42,7 +43,7 @@ const Analytics = () => {
       const data = await RoomAPI.getAllRooms();
       setRooms(data);
     } catch (err) {
-      setError("Failed to load rooms");
+      toast.error("Failed to load rooms");
       console.error(err);
     }
   };
@@ -222,14 +223,15 @@ const Analytics = () => {
             </h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700">Room</label>
+                <label className="block text-sm font-medium text-gray-700">
+                  Room
+                </label>
                 <select
                   name="room"
-                  value={formData.room?.roomId || ''}
+                  value={formData.room?.roomId || ""}
                   onChange={handleRoomChange}
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2"
-                  required
-                >
+                  required>
                   <option value="">Select a room</option>
                   {rooms.map((room) => (
                     <option key={room.roomId} value={room.roomId}>
@@ -240,7 +242,9 @@ const Analytics = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">Usage Rate (%)</label>
+                <label className="block text-sm font-medium text-gray-700">
+                  Usage Rate (%)
+                </label>
                 <input
                   type="number"
                   name="usageRate"
@@ -254,7 +258,9 @@ const Analytics = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">Peak Hours</label>
+                <label className="block text-sm font-medium text-gray-700">
+                  Peak Hours
+                </label>
                 <input
                   type="time"
                   name="peakHours"
@@ -266,7 +272,9 @@ const Analytics = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">Date</label>
+                <label className="block text-sm font-medium text-gray-700">
+                  Date
+                </label>
                 <input
                   type="date"
                   name="dateGenerated"
@@ -281,15 +289,13 @@ const Analytics = () => {
                 <button
                   type="button"
                   onClick={handleCloseModal}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
-                >
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200">
                   Cancel
                 </button>
                 <button
                   type="submit"
                   className="px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded-md hover:bg-blue-600"
-                  disabled={loading}
-                >
+                  disabled={loading}>
                   {loading ? "Saving..." : "Save"}
                 </button>
               </div>

@@ -3,6 +3,7 @@ import { LibraryRoomAPI } from "../services/AdminAPI/LibraryRoomAPI";
 import * as LibraryApi from "../services/AdminAPI/LibraryAPI";
 import { useAuth } from "../contexts/AuthContext";
 import { Pencil, Trash2, Plus } from "lucide-react";
+import { toast } from "react-toastify";
 
 const Library = () => {
   const [libraries, setLibraries] = useState([]);
@@ -35,23 +36,22 @@ const Library = () => {
     try {
       const data = await LibraryRoomAPI.getAllRooms();
       setLibraries(data);
-      setError("");
     } catch (err) {
-      setError(
+      toast.error(
         "Failed to load libraries: " + (err.response?.data || err.message)
       );
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const fetchLibraryList = async () => {
     try {
       const libraries = await LibraryApi.getAllLibraries();
       setLibraryList(libraries);
-      console.log("Available libraries:", libraries);
     } catch (err) {
       console.error("Error fetching libraries:", err);
-      setError("Failed to load libraries");
+      toast.error("Failed to load libraries");
     }
   };
 
@@ -108,13 +108,11 @@ const Library = () => {
     if (window.confirm("Are you sure you want to delete this library room?")) {
       try {
         setLoading(true);
-        await LibraryRoomAPI.deleteRoom(id);
-        await loadLibraries();
-      } catch (err) {
-        setError(
-          "Failed to delete library room: " +
-            (err.response?.data || err.message)
-        );
+        await LibraryRoomAPI.deleteLibraryRoom(id);
+        toast.success("Library room deleted successfully");
+        loadLibraries();
+      } catch (error) {
+        toast.error("Failed to delete library room");
       } finally {
         setLoading(false);
       }

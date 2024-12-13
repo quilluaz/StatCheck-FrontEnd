@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { UserAPI } from "../services/AdminAPI/UserAPI";
 import { Pencil, Trash2, Plus } from "lucide-react";
+import { toast } from "react-toastify";
 
 function Users() {
   const [users, setUsers] = useState([]);
@@ -56,13 +57,15 @@ function Users() {
     }
   };
 
-  const handleDeleteUser = async (userID) => {
-    try {
-      await UserAPI.deleteUser(userID);
-      loadUsers();
-    } catch (error) {
-      console.error("Error deleting user:", error);
-      setError("Failed to delete user. Please try again.");
+  const handleDeleteUser = async (userId) => {
+    if (window.confirm("Are you sure you want to delete this user?")) {
+      try {
+        await UserAPI.deleteUser(userId);
+        toast.success("User deleted successfully");
+        loadUsers();
+      } catch (error) {
+        toast.error("Failed to delete user");
+      }
     }
   };
 

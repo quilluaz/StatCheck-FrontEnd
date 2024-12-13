@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import SubjectsAPI from "../services/AdminAPI/SubjectsAPI";
 import { Pencil, Trash2, Plus, X } from "lucide-react";
+import { toast } from "react-toastify";
 
 const SubjectComponent = () => {
   const [subjects, setSubjects] = useState([]);
@@ -55,17 +56,19 @@ const SubjectComponent = () => {
     try {
       if (isEditing) {
         await SubjectsAPI.updateSubject(currentSubject.subjectId, currentSubject);
+        toast.success("Subject updated successfully");
       } else {
         await SubjectsAPI.createSubject(currentSubject);
+        toast.success("Subject created successfully");
       }
       await fetchSubjects();
       handleCloseModal();
       setError(null);
     } catch (err) {
       if (err.response?.status === 401) {
-        setError("Unauthorized access. Please ensure you are logged in as an admin.");
+        toast.error("Unauthorized access. Please ensure you are logged in as an admin.");
       } else {
-        setError(isEditing ? "Failed to update subject" : "Failed to create subject");
+        toast.error(isEditing ? "Failed to update subject" : "Failed to create subject");
       }
       console.error(err);
     } finally {
@@ -90,12 +93,13 @@ const SubjectComponent = () => {
       try {
         await SubjectsAPI.deleteSubject(id);
         await fetchSubjects();
+        toast.success("Subject deleted successfully");
         setError(null);
       } catch (err) {
         if (err.response?.status === 401) {
-          setError("Unauthorized access. Please ensure you are logged in as an admin.");
+          toast.error("Unauthorized access. Please ensure you are logged in as an admin.");
         } else {
-          setError("Failed to delete subject");
+          toast.error("Failed to delete subject");
         }
         console.error(err);
       } finally {

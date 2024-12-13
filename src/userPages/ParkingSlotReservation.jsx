@@ -3,6 +3,7 @@ import Navbar from "../components/UserNavbar";
 import { ParkingLotAPI } from "../services/AdminAPI/ParkingLotAPI";
 import { ParkingReservationAPI } from "../services/AdminAPI/ParkingReservationAPI";
 import { useAuth } from "../contexts/AuthContext";
+import { toast } from "react-toastify";
 
 function ParkingLot() {
   const [parkingLots, setParkingLots] = useState([]);
@@ -25,7 +26,7 @@ function ParkingLot() {
         const response = await ParkingLotAPI.getAllParkingLots();
         setParkingLots(response);
       } catch (err) {
-        setError("Failed to load parking lots.");
+        toast.error("Failed to load parking lots.");
       }
     };
     loadParkingLots();
@@ -42,7 +43,7 @@ function ParkingLot() {
 
   const handleReserve = async () => {
     if (!user) {
-      setError("You must be logged in to make a reservation.");
+      toast.error("You must be logged in to make a reservation.");
       return;
     }
 
@@ -64,18 +65,16 @@ function ParkingLot() {
           reservationEndTime: endDateTime,
         });
 
-        setMessage(
-          `Reserved spot ${selectedSpot} from ${startTime} to ${endTime}`
-        );
+        toast.success(`Reserved spot ${selectedSpot} from ${startTime} to ${endTime}`);
         setSelectedSpot(null);
         setReservationDate(new Date().toISOString().split("T")[0]);
         setStartTime("");
         setEndTime("");
       } catch (err) {
-        setError("Failed to reserve parking spot: " + err.message);
+        toast.error("Failed to reserve parking spot: " + err.message);
       }
     } else {
-      setError("Please select a date, time, and a spot.");
+      toast.error("Please select a date, time, and a spot.");
     }
   };
 

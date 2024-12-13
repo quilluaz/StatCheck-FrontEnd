@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { BuildingAPI } from "../services/AdminAPI/BuildingAPI";
 import { RoomAPI } from "../services/AdminAPI/RoomAPI";
 import { Pencil, Trash, Plus, X } from "lucide-react";
+import { toast } from "react-toastify";
 
 const Rooms = () => {
   const [rooms, setRooms] = useState([]);
@@ -34,7 +35,7 @@ const Rooms = () => {
       const data = await RoomAPI.getAllRooms();
       setRooms(data);
     } catch (error) {
-      alert("Error fetching rooms: " + error.message);
+      toast.error("Error fetching rooms: " + error.message);
     } finally {
       setIsLoading(false);
     }
@@ -45,7 +46,7 @@ const Rooms = () => {
       const data = await BuildingAPI.getAllBuildings();
       setBuildings(data);
     } catch (error) {
-      alert("Error fetching buildings: " + error.message);
+      toast.error("Error fetching buildings: " + error.message);
     }
   };
 
@@ -70,7 +71,7 @@ const Rooms = () => {
           }));
         } catch (error) {
           console.error("Error fetching floors:", error);
-          alert("Error fetching floors");
+          toast.error("Error fetching floors");
         }
       }
     } else if (name === "floorNumber") {
@@ -78,7 +79,9 @@ const Rooms = () => {
         currentRoom.building &&
         (parseInt(value) < 1 || parseInt(value) > currentRoom.building.floors)
       ) {
-        alert(`Floor must be between 1 and ${currentRoom.building.floors}`);
+        toast.error(
+          `Floor must be between 1 and ${currentRoom.building.floors}`
+        );
         return;
       }
       setCurrentRoom((prev) => ({
@@ -158,14 +161,16 @@ const Rooms = () => {
 
       if (isEditing) {
         await RoomAPI.updateRoom(currentRoom.roomID, roomData);
+        toast.success("Room updated successfully");
       } else {
         await RoomAPI.createRoom(roomData);
+        toast.success("Room created successfully");
       }
 
       await fetchRooms();
       handleCloseModal();
     } catch (error) {
-      alert(error.message);
+      toast.error("Error: " + error.message);
     } finally {
       setIsLoading(false);
     }
@@ -189,13 +194,11 @@ const Rooms = () => {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this room?")) {
       try {
-        setIsLoading(true);
         await RoomAPI.deleteRoom(id);
-        await fetchRooms();
+        toast.success("Room deleted successfully");
+        fetchRooms();
       } catch (error) {
-        alert("Error deleting room: " + error.message);
-      } finally {
-        setIsLoading(false);
+        toast.error("Failed to delete room");
       }
     }
   };

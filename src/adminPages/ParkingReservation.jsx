@@ -3,6 +3,7 @@ import { ParkingReservationAPI } from "../services/AdminAPI/ParkingReservationAP
 import { Pencil, Trash2, Plus } from "lucide-react";
 import { UserAPI } from "../services/AdminAPI/UserAPI";
 import { ParkingLotAPI } from "../services/AdminAPI/ParkingLotAPI";
+import { toast } from "react-toastify";
 
 const ParkingReservation = () => {
   const [parkingLots, setParkingLots] = useState([]);
@@ -36,7 +37,7 @@ const ParkingReservation = () => {
         const response = await ParkingLotAPI.getAllParkingLots();
         setParkingLots(response);
       } catch (err) {
-        setError("Failed to load parking lots.");
+        toast.error("Failed to load parking lots.");
       }
     };
 
@@ -45,7 +46,7 @@ const ParkingReservation = () => {
         const response = await ParkingReservationAPI.getAllReservations();
         setReservations(response);
       } catch (err) {
-        setError("Failed to load reservations.");
+        toast.error("Failed to load reservations.");
       }
     };
 
@@ -69,7 +70,7 @@ const ParkingReservation = () => {
           reservations.filter((res) => res.reservationEndTime >= now)
         );
       } catch (err) {
-        setError("Failed to delete expired reservations.");
+        toast.error("Failed to delete expired reservations.");
       }
     }, 60000);
     return () => clearInterval(interval);

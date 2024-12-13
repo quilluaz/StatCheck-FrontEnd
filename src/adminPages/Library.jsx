@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
-import * as LibraryApi from '../services/AdminAPI/LibraryAPI';
+import * as LibraryApi from "../services/AdminAPI/LibraryAPI";
 import { Pencil, Trash2, Plus } from "lucide-react";
+import { toast } from "react-toastify";
 
 const Library = () => {
   const [libraries, setLibraries] = useState([]);
@@ -24,7 +25,9 @@ const Library = () => {
       setError(null);
     } catch (err) {
       if (err.response?.status === 401) {
-        setError("Unauthorized access. Please ensure you are logged in as an admin.");
+        setError(
+          "Unauthorized access. Please ensure you are logged in as an admin."
+        );
       } else {
         setError("Failed to fetch libraries. Please try again later.");
       }
@@ -43,21 +46,19 @@ const Library = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
     try {
-      setLoading(true);
       if (editingLibrary) {
         await LibraryApi.updateLibrary(editingLibrary.libraryID, formData);
+        toast.success("Library updated successfully");
       } else {
         await LibraryApi.createLibrary(formData);
+        toast.success("Library created successfully");
       }
-      await fetchLibraries();
+      fetchLibraries();
       handleCloseModal();
     } catch (err) {
-      if (err.response?.status === 401) {
-        setError("Unauthorized access. Please ensure you are logged in as an admin.");
-      } else {
-        setError(editingLibrary ? "Failed to update library" : "Failed to create library");
-      }
+      toast.error(err.response?.data || "An error occurred");
     } finally {
       setLoading(false);
     }
@@ -68,13 +69,10 @@ const Library = () => {
       try {
         setLoading(true);
         await LibraryApi.deleteLibrary(id);
-        await fetchLibraries();
-      } catch (err) {
-        if (err.response?.status === 401) {
-          setError("Unauthorized access. Please ensure you are logged in as an admin.");
-        } else {
-          setError("Failed to delete library");
-        }
+        toast.success("Library deleted successfully");
+        fetchLibraries();
+      } catch (error) {
+        toast.error("Failed to delete library");
       } finally {
         setLoading(false);
       }
@@ -137,15 +135,18 @@ const Library = () => {
             <tbody className="divide-y divide-gray-200">
               {libraries.map((library) => (
                 <tr key={library.libraryID}>
-                  <td className="px-6 py-4 whitespace-nowrap">{library.libraryID}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">{library.libraryName}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {library.libraryID}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {library.libraryName}
+                  </td>
                   <td className="px-6 py-4">
                     <div className="flex flex-wrap gap-2">
                       {library.libraryRooms.map((room, index) => (
                         <span
                           key={index}
-                          className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
-                        >
+                          className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                           {room.roomName}
                         </span>
                       ))}

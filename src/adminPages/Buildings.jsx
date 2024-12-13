@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { BuildingAPI } from "../services/AdminAPI/BuildingAPI";
 import { Pencil, Trash2, Plus, X } from "lucide-react";
+import { toast } from "react-toastify";
 
 const Building = () => {
   const [buildings, setBuildings] = useState([]);
@@ -83,16 +84,10 @@ const Building = () => {
       try {
         setLoading(true);
         await BuildingAPI.deleteBuilding(id);
-        await fetchBuildings();
-        setError(null);
-      } catch (err) {
-        if (err.response?.status === 401) {
-          setError(
-            "Unauthorized access. Please ensure you are logged in as an admin."
-          );
-        } else {
-          setError("Failed to delete building");
-        }
+        toast.success("Building deleted successfully");
+        fetchBuildings();
+      } catch (error) {
+        toast.error("Failed to delete building");
       } finally {
         setLoading(false);
       }

@@ -3,6 +3,7 @@ import { ScheduleAPI } from "../services/AdminAPI/ScheduleAPI";
 import { Pencil, Trash, Plus } from "lucide-react";
 import { RoomAPI } from "../services/AdminAPI/RoomAPI";
 import SubjectsAPI from "../services/AdminAPI/SubjectsAPI";
+import { toast } from "react-toastify";
 
 const Schedule = () => {
   const [schedules, setSchedules] = useState([]);
@@ -94,16 +95,17 @@ const Schedule = () => {
 
       if (isEditing) {
         await ScheduleAPI.updateSchedule(currentSchedule.scheduleId, scheduleData);
+        toast.success("Schedule updated successfully");
       } else {
         await ScheduleAPI.createSchedule(scheduleData);
+        toast.success("Schedule created successfully");
       }
       
       await loadSchedules();
       handleCloseModal();
       
     } catch (error) {
-      console.error('Error saving schedule:', error);
-      setError(error.message || 'Failed to save schedule');
+      toast.error("Error: " + error.message);
     } finally {
       setIsLoading(false);
     }
@@ -124,16 +126,12 @@ const Schedule = () => {
 
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this schedule?")) {
-      setIsLoading(true);
       try {
         await ScheduleAPI.deleteSchedule(id);
-        await loadSchedules();
-        setError(null);
+        toast.success("Schedule deleted successfully");
+        loadSchedules();
       } catch (error) {
-        console.error('Error deleting schedule:', error);
-        setError(error.message || 'Failed to delete schedule');
-      } finally {
-        setIsLoading(false);
+        toast.error("Failed to delete schedule");
       }
     }
   };
